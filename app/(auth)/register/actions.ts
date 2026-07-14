@@ -31,6 +31,10 @@ export async function registerAction(data: RegisterSchema) {
 
         return { success: true, user: authData.user };
     } catch (err: any) {
-        return { success: false, error: err.message || "An unexpected error occurred." };
+        const isFetchFailed = err?.message?.toLowerCase().includes("fetch failed");
+        const errorMessage = isFetchFailed
+            ? "Failed to connect to the authentication server. Please check your internet connection or try again later."
+            : (err.message || "An unexpected error occurred.");
+        return { success: false, error: errorMessage };
     }
 }
