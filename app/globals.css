@@ -9,4 +9,73 @@
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Base */
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-card: #ffffff;
+
+  /* Text */
+  --color-heading: #0f172a;
+  --color-body: #475569;
+  --color-foreground: #1e293b;
+  --color-muted: #64748b;
+
+  /* Brand */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-secondary: #60a5fa;
+
+  /* States */
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+  --color-danger: #dc2626;
+  --color-info: #0ea5e9;
+
+  /* UI */
+  --color-border: #e2e8f0;
+  --color-divider: #cbd5e1;
+  --color-hover: #f1f5f9;
+  --color-active: #dbeafe;
+  --color-disabled: #94a3b8;
+
+  /* Inputs */
+  --color-input: #ffffff;
+  --color-input-border: #cbd5e1;
+
+  /* Misc */
+  --color-overlay: rgb(15 23 42 / 0.5);
+
+}
+
+.dark {
+
+  --color-background: #020617;
+  --color-surface: #111827;
+  --color-card: #1e293b;
+
+  --color-heading: #f8fafc;
+  --color-body: #cbd5e1;
+  --color-foreground: #ffffff;
+  --color-muted: #94a3b8;
+
+  --color-primary: #60a5fa;
+  --color-primary-hover: #3b82f6;
+  --color-secondary: #93c5fd;
+
+  --color-success: #22c55e;
+  --color-warning: #fbbf24;
+  --color-danger: #ef4444;
+  --color-info: #38bdf8;
+
+  --color-border: #334155;
+  --color-divider: #475569;
+  --color-hover: #1e293b;
+  --color-active: #1d4ed8;
+  --color-disabled: #64748b;
+
+  --color-input: #111827;
+  --color-input-border: #334155;
+
+  --color-overlay: rgb(0 0 0 / 0.7);
 }
