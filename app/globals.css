@@ -1,54 +1,46 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 1. LIGHT THEME VARIABLES (Default) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --background: #f8fafc;
+  --foreground: #1e293b;
 
-@theme inline {
-
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-
-  /* Base */
   --color-background: #f8fafc;
   --color-surface: #ffffff;
   --color-card: #ffffff;
 
-  /* Text */
   --color-heading: #0f172a;
   --color-body: #475569;
   --color-foreground: #1e293b;
   --color-muted: #64748b;
 
-  /* Brand */
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
   --color-secondary: #60a5fa;
 
-  /* States */
   --color-success: #16a34a;
   --color-warning: #f59e0b;
   --color-danger: #dc2626;
   --color-info: #0ea5e9;
 
-  /* UI */
   --color-border: #e2e8f0;
   --color-divider: #cbd5e1;
   --color-hover: #f1f5f9;
   --color-active: #dbeafe;
   --color-disabled: #94a3b8;
 
-  /* Inputs */
   --color-input: #ffffff;
   --color-input-border: #cbd5e1;
 
-  /* Misc */
   --color-overlay: rgb(15 23 42 / 0.5);
-
 }
 
-.dark {
+/* 2. DARK THEME VARIABLES (Triggered when html element has .dark class) */
+html.dark, :root.dark {
+  --background: #020617;
+  --foreground: #ffffff;
 
   --color-background: #020617;
   --color-surface: #111827;
@@ -78,4 +70,39 @@
   --color-input-border: #334155;
 
   --color-overlay: rgb(0 0 0 / 0.7);
+}
+
+/* 3. TAILWIND THEME CONFIGURATION (Maps utility classes to our dynamic CSS variables) */
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-card: var(--color-card);
+
+  --color-heading: var(--color-heading);
+  --color-body: var(--color-body);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-secondary: var(--color-secondary);
+
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-info: var(--color-info);
+
+  --color-border: var(--color-border);
+  --color-divider: var(--color-divider);
+  --color-hover: var(--color-hover);
+  --color-active: var(--color-active);
+  --color-disabled: var(--color-disabled);
+
+  --color-input: var(--color-input);
+  --color-input-border: var(--color-input-border);
+
+  --color-overlay: var(--color-overlay);
 }
