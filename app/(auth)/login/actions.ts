@@ -20,7 +20,14 @@ export async function loginAction(data: LoginSchema) {
       return { success: false, error: error.message };
     }
 
-    return { success: true, user: authData.user };
+    // Fetch user's role from public.profiles
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", authData.user.id)
+      .single();
+
+    return { success: true, user: authData.user, role: profile?.role || "PATIENT" };
   } catch (err: any) {
     const isFetchFailed = err?.message?.toLowerCase().includes("fetch failed");
     const errorMessage = isFetchFailed

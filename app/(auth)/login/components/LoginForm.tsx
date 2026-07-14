@@ -32,7 +32,17 @@ const LoginForm = () => {
       const response = await loginAction(data);
       if (response.success) {
         toast.success("Welcome back! Signing you in...");
-        router.push("/dashboard");
+        
+        const dashboards: Record<string, string> = {
+          PATIENT: "/patient",
+          DOCTOR: "/doctor",
+          RECEPTIONIST: "/receptionist",
+          LAB_MANAGER: "/lab-manager",
+          MANAGER: "/manager"
+        };
+        const targetPath = dashboards[response.role || "PATIENT"] || "/patient";
+        
+        router.push(targetPath);
         router.refresh();
       } else {
         toast.error(response.error || "Invalid credentials.");
