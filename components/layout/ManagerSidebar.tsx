@@ -9,6 +9,7 @@ import {
   Receipt,
   BarChart3,
   ScrollText,
+  User,
 } from "lucide-react";
 
 const managerNavItems: NavItem[] = [
@@ -19,6 +20,7 @@ const managerNavItems: NavItem[] = [
   { label: "Finance",        href: "/manager/finance",   icon: Receipt },
   { label: "Analytics",      href: "/manager/analytics", icon: BarChart3 },
   { label: "Audit Logs",     href: "/manager/logs",      icon: ScrollText },
+  { label: "My Profile",     href: "/manager/profile",   icon: User },
 ];
 
 interface ManagerSidebarProps {

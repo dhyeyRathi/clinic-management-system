@@ -232,3 +232,132 @@ export async function deleteResourceAction(
     };
   }
 }
+
+export async function requestResourceAction(
+  resourceId: string,
+  quantity: number,
+  reason: string
+): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { success: false, error: "Authentication required." };
+    }
+
+    const { data: requestRow, error } = await supabase
+      .from("resource_requests")
+      .insert({
+        resource_id: resourceId,
+        requester_id: user.id,
+        quantity,
+        reason,
+        status: "PENDING",
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Log activity
+    await supabase.rpc("log_activity", {
+      p_action: "REQUEST_RESOURCE",
+      p_entity_type: "resource_request",
+      p_entity_id: requestRow?.id,
+      p_after_data: { resourceId, quantity, reason },
+    });
+
+    revalidatePath("/manager/resources");
+    revalidatePath("/lab-manager/resources");
+    return { success: true };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || "An unexpected error occurred.",
+    };
+  }
+}
+
+export async function updateResourceRequestStatusAction(
+  requestId: string,
+  status: "APPROVED" | "REJECTED",
+  adminNotes?: string
+): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+
+    const { data: request, error: requestError } = await supabase
+      .from("resource_requests")
+      .select("resource_id, quantity, status")
+      .eq("id", requestId)
+      .single();
+
+    if (requestError || !request) {
+      return { success: false, error: requestError?.message || "Request not found." };
+    }
+
+    if (request.status !== "PENDING") {
+      return { success: false, error: "This request has already been processed." };
+    }
+
+    if (status === "APPROVED") {
+      // Fetch resource availability
+      const { data: resource, error: resourceError } = await supabase
+        .from("staff_resources")
+        .select("available_quantity, name")
+        .eq("id", request.resource_id)
+        .single();
+
+      if (resourceError || !resource) {
+        return { success: false, error: resourceError?.message || "Resource not found." };
+      }
+
+      if (resource.available_quantity < request.quantity) {
+        return {
+          success: false,
+          error: `Insufficient stock of ${resource.name}. Only ${resource.available_quantity} available.`,
+        };
+      }
+
+      // Update resource availability
+      const { error: resourceUpdateError } = await supabase
+        .from("staff_resources")
+        .update({ available_quantity: resource.available_quantity - request.quantity })
+        .eq("id", request.resource_id);
+
+      if (resourceUpdateError) {
+        return { success: false, error: resourceUpdateError.message };
+      }
+    }
+
+    // Update request status
+    const { error: requestUpdateError } = await supabase
+      .from("resource_requests")
+      .update({ status, admin_notes: adminNotes || null })
+      .eq("id", requestId);
+
+    if (requestUpdateError) {
+      return { success: false, error: requestUpdateError.message };
+    }
+
+    // Log activity
+    await supabase.rpc("log_activity", {
+      p_action: `PROCESS_RESOURCE_REQUEST_${status}`,
+      p_entity_type: "resource_request",
+      p_entity_id: requestId,
+      p_after_data: { status, adminNotes },
+    });
+
+    revalidatePath("/manager/resources");
+    revalidatePath("/lab-manager/resources");
+    return { success: true };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || "An unexpected error occurred.",
+    };
+  }
+}

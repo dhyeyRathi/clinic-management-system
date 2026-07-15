@@ -6,6 +6,8 @@ import {
   Users,
   CalendarDays,
   Receipt,
+  Boxes,
+  User,
 } from "lucide-react";
 
 const receptionistNavItems: NavItem[] = [
@@ -13,6 +15,8 @@ const receptionistNavItems: NavItem[] = [
   { label: "Clients",        href: "/receptionist/clients",       icon: Users },
   { label: "Appointments",   href: "/receptionist/appointments",  icon: CalendarDays },
   { label: "Billing Desk",   href: "/receptionist/invoices",      icon: Receipt },
+  { label: "Resources",      href: "/receptionist/resources",     icon: Boxes },
+  { label: "My Profile",     href: "/receptionist/profile",      icon: User },
 ];
 
 interface ReceptionistSidebarProps {

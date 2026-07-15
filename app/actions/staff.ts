@@ -192,3 +192,84 @@ export async function updateStaffStatusAction(
     };
   }
 }
+
+export async function updateStaffProfileAction(formData: FormData): Promise<ActionResponse> {
+  const name = formData.get("name") as string;
+  const phone = formData.get("phone") as string;
+  const avatarFile = formData.get("avatar") as File | null;
+
+  if (!name) {
+    return { success: false, error: "Name is required." };
+  }
+
+  try {
+    const supabase = await createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return { success: false, error: "Unauthorized." };
+    }
+
+    let avatarUrl = "";
+    if (avatarFile && avatarFile.size > 0) {
+      try {
+        const bytes = await avatarFile.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        const uploadResult = await new Promise<any>((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "images/staff" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          ).end(buffer);
+        });
+        avatarUrl = uploadResult.secure_url;
+      } catch (err: any) {
+        console.error("Cloudinary upload failed:", err);
+        return { success: false, error: "Failed to upload avatar image to Cloudinary." };
+      }
+    }
+
+    // Fetch before state for logs
+    const { data: oldProfile } = await supabase
+      .from("profiles")
+      .select("name, phone, avatar_url")
+      .eq("id", user.id)
+      .single();
+
+    const profileUpdates: any = {
+      name,
+      phone: phone || null,
+    };
+    if (avatarUrl) {
+      profileUpdates.avatar_url = avatarUrl;
+    }
+
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update(profileUpdates)
+      .eq("id", user.id);
+
+    if (profileError) {
+      return { success: false, error: profileError.message };
+    }
+
+    // Log the update activity
+    await supabase.rpc("log_activity", {
+      p_action: "UPDATE_STAFF_PROFILE",
+      p_entity_type: "staff",
+      p_entity_id: user.id,
+      p_before_data: oldProfile,
+      p_after_data: { name, phone, avatar_url: avatarUrl || oldProfile?.avatar_url },
+    });
+
+    revalidatePath("/manager/profile");
+    revalidatePath("/receptionist/profile");
+    revalidatePath("/lab-manager/profile");
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to update profile." };
+  }
+}
