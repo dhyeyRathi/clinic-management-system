@@ -82,23 +82,8 @@ export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
-    const name = formData.get("name") as string;
-    const description = formData.get("description") as string;
-    const priceStr = formData.get("price") as string;
-    const status = formData.get("status") as "ACTIVE" | "INACTIVE";
-
-    if (!name || !priceStr) {
-      setError("Name and Price are required.");
-      return;
-    }
-
     startTransition(async () => {
-      const result = await updateLabTestTypeAction(editingTest.id, {
-        name,
-        description,
-        price: parseFloat(priceStr),
-        status,
-      });
+      const result = await updateLabTestTypeAction(editingTest.id, formData);
 
       if (result.success) {
         toast.success("Lab test updated successfully!");
@@ -155,9 +140,17 @@ export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
               {/* Header */}
               <div className="flex justify-between items-start gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                    <FlaskConical className="w-5 h-5" />
-                  </div>
+                  {test.image_url ? (
+                    <img
+                      src={test.image_url}
+                      alt={test.name}
+                      className="w-10 h-10 rounded-xl object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
+                      <FlaskConical className="w-5 h-5" />
+                    </div>
+                  )}
                   <div>
                     <h3 className="font-bold text-heading text-base leading-snug">
                       {test.name}
@@ -239,7 +232,7 @@ export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
               </button>
             </div>
 
-            <form onSubmit={handleAddSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleAddSubmit} encType="multipart/form-data" className="p-6 space-y-4">
               {error && (
                 <div className="p-3 bg-danger/10 border border-danger/20 text-danger rounded-xl text-xs font-semibold flex items-center gap-2">
                   <X className="w-4 h-4 shrink-0" />
@@ -297,6 +290,21 @@ export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
                     className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-input border border-input-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50"
                   />
                 </div>
+              </div>
+
+              {/* Thumbnail Image (Compulsory) */}
+              <div>
+                <label className="block text-xs font-bold text-heading uppercase mb-1.5">
+                  Thumbnail Image (Required)
+                </label>
+                <input
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  required
+                  disabled={isPending}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-input border border-input-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer"
+                />
               </div>
 
               <div>
@@ -359,7 +367,7 @@ export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
               </button>
             </div>
 
-            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleEditSubmit} encType="multipart/form-data" className="p-6 space-y-4">
               {error && (
                 <div className="p-3 bg-danger/10 border border-danger/20 text-danger rounded-xl text-xs font-semibold flex items-center gap-2">
                   <X className="w-4 h-4 shrink-0" />
@@ -420,6 +428,20 @@ export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
                     className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-input border border-input-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50"
                   />
                 </div>
+              </div>
+
+              {/* Thumbnail Image (Optional on Edit) */}
+              <div>
+                <label className="block text-xs font-bold text-heading uppercase mb-1.5">
+                  Thumbnail Image (Optional)
+                </label>
+                <input
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  disabled={isPending}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-input border border-input-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer"
+                />
               </div>
 
               <div>

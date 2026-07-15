@@ -21,6 +21,15 @@ export async function resetPasswordAction(data: ResetPasswordSchema) {
       return { success: false, error: error.message };
     }
 
+    // Clear the must_change_password flag so user can log in normally going forward
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ must_change_password: false })
+        .eq("id", user.id);
+    }
+
     return { success: true };
   } catch (err: any) {
     const isFetchFailed = err?.message?.toLowerCase().includes("fetch failed");

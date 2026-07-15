@@ -39,7 +39,7 @@ export default async function ManagerLayout({
         userName={profile?.name ?? "Manager"}
         userEmail={user.email}
       />
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto pt-14 md:pt-0">
         {children}
       </main>
     </div>

@@ -1,7 +1,10 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { sendStaffWelcomeEmail } from "@/lib/email";
+import { cloudinary } from "@/lib/cloudinary";
 
 export interface ActionResponse {
   success: boolean;
@@ -17,6 +20,7 @@ export async function createStaffAction(
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const role = formData.get("role") as string;
+  const avatarFile = formData.get("avatar") as File | null;
 
   // Doctor specific fields
   const specialization = formData.get("specialization") as string;
@@ -27,7 +31,34 @@ export async function createStaffAction(
     return { success: false, error: "Please fill in all required fields." };
   }
 
+  // Guard: Doctor photo is compulsory
+  if (role === "DOCTOR" && (!avatarFile || avatarFile.size === 0)) {
+    return { success: false, error: "Facial photo is compulsory for doctor accounts." };
+  }
+
   try {
+    let avatarUrl = "";
+    if (avatarFile && avatarFile.size > 0) {
+      try {
+        const bytes = await avatarFile.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        const uploadResult = await new Promise<any>((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { folder: "images/doctors" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          ).end(buffer);
+        });
+        avatarUrl = uploadResult.secure_url;
+      } catch (err: any) {
+        console.error("Cloudinary upload failed:", err);
+        return { success: false, error: "Failed to upload doctor photo to Cloudinary." };
+      }
+    }
+
     const supabase = await createClient();
 
     // 1. Call database RPC function to create the auth user safely
@@ -43,6 +74,19 @@ export async function createStaffAction(
 
     if (rpcError) {
       return { success: false, error: rpcError.message };
+    }
+
+    // 1.5. Update profile: avatar_url + must_change_password flag
+    const profileUpdate: Record<string, any> = { must_change_password: true };
+    if (avatarUrl) profileUpdate.avatar_url = avatarUrl;
+
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update(profileUpdate)
+      .eq("id", userId);
+
+    if (profileError) {
+      console.error("Failed to update profile:", profileError);
     }
 
     // 2. If the role is DOCTOR, create the supplementary doctor_profile row
@@ -67,6 +111,45 @@ export async function createStaffAction(
       }
     }
 
+    // 3. Log the activity in the audit logs
+    const { error: logError } = await supabase.rpc("log_activity", {
+      p_action: "CREATE_STAFF",
+      p_entity_type: "staff",
+      p_entity_id: userId,
+      p_after_data: { name, email, role, specialization, qualifications, consultationFee: feeStr ? parseFloat(feeStr) : 0 },
+    });
+    if (logError) {
+      console.error("Failed to write activity log:", logError.message);
+    }
+
+    // 4. Generate a password reset link and send welcome email
+    try {
+      const adminSupabase = createAdminClient();
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+      const { data: linkData, error: linkError } = await adminSupabase.auth.admin.generateLink({
+        type: "recovery",
+        email,
+        options: {
+          redirectTo: `${siteUrl}/reset-password`,
+        },
+      });
+
+      if (linkError) {
+        console.error("Failed to generate reset link:", linkError.message);
+      } else if (linkData?.properties?.action_link) {
+        await sendStaffWelcomeEmail({
+          to: email,
+          name,
+          role,
+          resetLink: linkData.properties.action_link,
+        });
+      }
+    } catch (emailErr: any) {
+      // Email failure is non-fatal — staff account still created
+      console.error("Welcome email failed:", emailErr.message);
+    }
+
     revalidatePath("/manager/staff");
     return { success: true };
   } catch (error: any) {
@@ -84,6 +167,14 @@ export async function updateStaffStatusAction(
   try {
     const supabase = await createClient();
 
+    // 1. Fetch current status for before_data log
+    const { data: beforeProfile } = await supabase
+      .from("profiles")
+      .select("status")
+      .eq("id", userId)
+      .single();
+
+    // 2. Perform status update
     const { error } = await supabase
       .from("profiles")
       .update({ status })
@@ -91,6 +182,18 @@ export async function updateStaffStatusAction(
 
     if (error) {
       return { success: false, error: error.message };
+    }
+
+    // 3. Log the status update activity
+    const { error: logError } = await supabase.rpc("log_activity", {
+      p_action: "UPDATE_STAFF_STATUS",
+      p_entity_type: "staff",
+      p_entity_id: userId,
+      p_before_data: { status: beforeProfile?.status || "UNKNOWN" },
+      p_after_data: { status },
+    });
+    if (logError) {
+      console.error("Failed to write activity log:", logError.message);
     }
 
     revalidatePath("/manager/staff");

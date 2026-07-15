@@ -96,7 +96,7 @@ export default function LogsClient({ initialLogs }: LogsClientProps) {
                   return (
                     <>
                       <tr
-                        key={log.id}
+
                         onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
                         className="hover:bg-hover/20 transition-colors cursor-pointer"
                       >

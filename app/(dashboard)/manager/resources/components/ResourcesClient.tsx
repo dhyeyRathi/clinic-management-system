@@ -5,6 +5,7 @@ import {
   createResourceAction,
   updateResourceAction,
   toggleResourceStatusAction,
+  deleteResourceAction,
 } from "@/app/actions/resources";
 import { uploadFileAction } from "@/app/actions/upload";
 import {
@@ -14,6 +15,7 @@ import {
   X,
   Boxes,
   Edit2,
+  Trash2,
   Loader2,
   Hotel,
   SlidersHorizontal,
@@ -82,6 +84,26 @@ export default function ResourcesClient({ initialResources }: ResourcesClientPro
     } finally {
       setUploading(false);
     }
+  }
+
+  async function handleDelete(resourceId: string, name: string) {
+    if (!window.confirm(`Are you sure you want to delete ${name}? This action cannot be undone.`)) {
+      return;
+    }
+
+    toast.promise(
+      (async () => {
+        const res = await deleteResourceAction(resourceId);
+        if (!res.success) throw new Error(res.error || "Failed to delete resource");
+        setResources((prev) => prev.filter((r) => r.id !== resourceId));
+        return name;
+      })(),
+      {
+        loading: "Deleting resource...",
+        success: (n) => `Deleted ${n} from inventory.`,
+        error: (err) => err.message || "Failed to delete resource.",
+      }
+    );
   }
 
   async function handleStatusChange(resourceId: string, newStatus: any) {
@@ -368,16 +390,26 @@ export default function ResourcesClient({ initialResources }: ResourcesClientPro
                       </div>
                     )}
 
-                    <button
-                      onClick={() => {
-                        setImageUrl(res.image_url);
-                        setEditingResource(res);
-                      }}
-                      className="flex items-center gap-1 text-xs text-muted hover:text-heading px-2.5 py-1.5 border border-border rounded-lg hover:border-divider active:scale-95 transition-colors cursor-pointer"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                      <span>Edit</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setImageUrl(res.image_url);
+                          setEditingResource(res);
+                        }}
+                        className="flex items-center gap-1 text-xs text-muted hover:text-heading px-2.5 py-1.5 border border-border rounded-lg hover:border-divider active:scale-95 transition-colors cursor-pointer"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                        <span>Edit</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(res.id, res.name)}
+                        className="flex items-center gap-1 text-xs text-danger hover:bg-danger/10 px-2.5 py-1.5 border border-danger/20 rounded-lg active:scale-95 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -8,6 +8,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Menu,
+  X,
   LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -36,6 +38,7 @@ export function Sidebar({
   userEmail,
 }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -45,46 +48,37 @@ export function Sidebar({
     router.push("/login");
   }
 
-  return (
-    <aside
-      className={`relative flex flex-col h-screen bg-surface border-r border-border transition-all duration-300 ease-in-out shrink-0 ${
-        collapsed ? "w-16" : "w-64"
-      }`}
-    >
-      {/* Collapse Toggle Button */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-6 z-10 w-6 h-6 rounded-full bg-surface border border-border flex items-center justify-center shadow-sm hover:bg-hover transition-colors cursor-pointer"
-        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      >
-        {collapsed ? (
-          <ChevronRight className="w-3 h-3 text-muted" />
-        ) : (
-          <ChevronLeft className="w-3 h-3 text-muted" />
-        )}
-      </button>
-
+  const navContent = (isMobile = false) => (
+    <>
       {/* Logo / Brand */}
       <div
         className={`flex items-center gap-3 px-4 py-5 border-b border-border ${
-          collapsed ? "justify-center px-2" : ""
+          !isMobile && collapsed ? "justify-center px-2" : ""
         }`}
       >
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
           <span className="text-white font-bold text-sm">C</span>
         </div>
-        {!collapsed && (
-          <div className="overflow-hidden">
+        {(isMobile || !collapsed) && (
+          <div className="overflow-hidden flex-1">
             <p className="text-heading font-semibold text-sm leading-tight truncate">
               ClinicFlow
             </p>
             <p className="text-muted text-xs truncate">Management Portal</p>
           </div>
         )}
+        {isMobile && (
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="ml-auto p-1 rounded-lg hover:bg-hover text-muted hover:text-heading transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Role Badge */}
-      {!collapsed && (
+      {(isMobile || !collapsed) && (
         <div className="px-4 pt-4">
           <span
             className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${roleBadgeColor}`}
@@ -113,27 +107,27 @@ export function Sidebar({
             <Link
               key={item.href}
               href={item.href}
-              title={collapsed ? item.label : undefined}
-              className={`group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+              title={!isMobile && collapsed ? item.label : undefined}
+              onClick={() => isMobile && setMobileOpen(false)}
+              className={`relative group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-body hover:bg-hover hover:text-heading"
-              } ${collapsed ? "justify-center px-2" : ""}`}
+              } ${!isMobile && collapsed ? "justify-center px-2" : ""}`}
             >
               <Icon
                 className={`w-5 h-5 shrink-0 transition-colors ${
                   isActive ? "text-primary" : "text-muted group-hover:text-heading"
                 }`}
               />
-              {!collapsed && (
+              {(isMobile || !collapsed) && (
                 <span className="truncate flex-1">{item.label}</span>
               )}
-              {!collapsed && item.badge && (
+              {(isMobile || !collapsed) && item.badge && (
                 <span className="ml-auto text-xs bg-danger/15 text-danger px-1.5 py-0.5 rounded-full font-semibold">
                   {item.badge}
                 </span>
               )}
-              {/* Active indicator bar */}
               {isActive && (
                 <span className="absolute left-0 w-0.5 h-6 bg-primary rounded-r-full" />
               )}
@@ -144,28 +138,22 @@ export function Sidebar({
 
       {/* Bottom Section: User + Actions */}
       <div className="border-t border-border p-3 space-y-2">
-        {/* Theme Toggle */}
-        <div className={`flex ${collapsed ? "justify-center" : "justify-end"}`}>
+        <div className={`flex ${!isMobile && collapsed ? "justify-center" : "justify-end"}`}>
           <ThemeToggle />
         </div>
-
-        {/* User Info + Logout */}
         <div
           className={`flex items-center gap-2 ${
-            collapsed ? "flex-col" : ""
+            !isMobile && collapsed ? "flex-col" : ""
           }`}
         >
-          {/* Avatar */}
           <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
             <span className="text-primary font-semibold text-xs uppercase">
               {userName.charAt(0)}
             </span>
           </div>
-          {!collapsed && (
+          {(isMobile || !collapsed) && (
             <div className="flex-1 min-w-0">
-              <p className="text-heading text-xs font-medium truncate">
-                {userName}
-              </p>
+              <p className="text-heading text-xs font-medium truncate">{userName}</p>
               {userEmail && (
                 <p className="text-muted text-xs truncate">{userEmail}</p>
               )}
@@ -181,6 +169,71 @@ export function Sidebar({
           </button>
         </div>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* ── MOBILE TOP BAR ─────────────────────────────────── */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 bg-surface border-b border-border">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shrink-0">
+            <span className="text-white font-bold text-xs">C</span>
+          </div>
+          <span className="text-heading font-semibold text-sm">ClinicFlow</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="p-2 rounded-lg hover:bg-hover text-muted hover:text-heading transition-colors cursor-pointer"
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* ── MOBILE DRAWER OVERLAY ──────────────────────────── */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 flex"
+          onClick={() => setMobileOpen(false)}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-overlay/60 backdrop-blur-sm" />
+          {/* Drawer */}
+          <aside
+            className="relative flex flex-col w-72 max-w-[85vw] h-full bg-surface border-r border-border shadow-2xl animate-in slide-in-from-left duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {navContent(true)}
+          </aside>
+        </div>
+      )}
+
+      {/* ── DESKTOP SIDEBAR ────────────────────────────────── */}
+      <aside
+        className={`hidden md:flex relative flex-col h-screen bg-surface border-r border-border transition-all duration-300 ease-in-out shrink-0 ${
+          collapsed ? "w-16" : "w-64"
+        }`}
+      >
+        {/* Collapse Toggle */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute -right-3 top-6 z-10 w-6 h-6 rounded-full bg-surface border border-border flex items-center justify-center shadow-sm hover:bg-hover transition-colors cursor-pointer"
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? (
+            <ChevronRight className="w-3 h-3 text-muted" />
+          ) : (
+            <ChevronLeft className="w-3 h-3 text-muted" />
+          )}
+        </button>
+
+        {navContent(false)}
+      </aside>
+    </>
   );
 }
+

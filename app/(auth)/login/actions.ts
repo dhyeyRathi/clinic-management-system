@@ -20,12 +20,27 @@ export async function loginAction(data: LoginSchema) {
       return { success: false, error: error.message };
     }
 
-    // Fetch user's role from public.profiles
+    // Fetch user's role, status, and must_change_password from public.profiles
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, status, must_change_password")
       .eq("id", authData.user.id)
       .single();
+
+    // Guard: Block logins for suspended or inactive accounts
+    if (profile && profile.status !== "ACTIVE") {
+      await supabase.auth.signOut();
+      const statusMsg = profile.status === "SUSPENDED" ? "suspended" : "inactive";
+      return {
+        success: false,
+        error: `Your account is ${statusMsg}.`,
+      };
+    }
+
+    // Guard: Force password change on first login
+    if (profile?.must_change_password) {
+      return { success: true, forcePasswordChange: true, role: profile.role };
+    }
 
     return { success: true, user: authData.user, role: profile?.role || "CLIENT" };
   } catch (err: any) {

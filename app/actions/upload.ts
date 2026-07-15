@@ -39,14 +39,14 @@ export async function uploadFileAction(
   }
 
   // Map input folder to actual Cloudinary cloud folder hierarchy
-  let targetFolder = "";
-  if (folder === "doctor_photos") {
-    targetFolder = "images/doctor_photos";
-  } else if (folder === "resource_photos") {
-    targetFolder = "images/resources";
-  } else {
-    targetFolder = `pdfs/${folder}`;
-  }
+  const folderMap: Record<CloudinaryFolder, string> = {
+    doctor_photos: "images/doctors",
+    resource_photos: "images/resources",
+    prescriptions: "pdfs/prescriptions",
+    client_invoices: "pdfs/client_invoices",
+    lab_test_results: "pdfs/lab_test_results",
+  };
+  const targetFolder = folderMap[folder];
 
   try {
     // Convert File object to Buffer

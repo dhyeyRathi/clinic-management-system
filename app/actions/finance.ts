@@ -16,6 +16,13 @@ export async function updateInvoiceStatusAction(
   try {
     const supabase = await createClient();
 
+    // Fetch state before update
+    const { data: beforeInvoice } = await supabase
+      .from("invoices")
+      .select("payment_status, payment_method, invoice_number")
+      .eq("id", invoiceId)
+      .single();
+
     const { error } = await supabase
       .from("invoices")
       .update({
@@ -27,6 +34,15 @@ export async function updateInvoiceStatusAction(
     if (error) {
       return { success: false, error: error.message };
     }
+
+    // Log activity
+    await supabase.rpc("log_activity", {
+      p_action: "UPDATE_INVOICE_STATUS",
+      p_entity_type: "invoice",
+      p_entity_id: invoiceId,
+      p_before_data: { payment_status: beforeInvoice?.payment_status, payment_method: beforeInvoice?.payment_method, invoice_number: beforeInvoice?.invoice_number },
+      p_after_data: { payment_status: paymentStatus, payment_method: paymentMethod || null },
+    });
 
     revalidatePath("/manager/finance");
     return { success: true };

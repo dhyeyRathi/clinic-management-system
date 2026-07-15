@@ -31,6 +31,14 @@ const LoginForm = () => {
     try {
       const response = await loginAction(data);
       if (response.success) {
+        // Force password change on first login
+        if (response.forcePasswordChange) {
+          toast.info("Please set a new password before continuing.");
+          router.push("/reset-password?first_login=true");
+          router.refresh();
+          return;
+        }
+
         toast.success("Welcome back! Signing you in...");
         
         const dashboards: Record<string, string> = {

@@ -39,25 +39,37 @@ export async function createResourceAction(
     const purchase_date = purchaseDateStr || null;
     const warranty_until = warrantyUntilStr || null;
 
-    const { error } = await supabase.from("staff_resources").insert({
-      name,
-      category,
-      description: description || null,
-      location: location || null,
-      quantity,
-      available_quantity,
-      status: status || "ACTIVE",
-      purchase_date,
-      purchase_cost,
-      manufacturer: manufacturer || null,
-      serial_number: serialNumber || null,
-      warranty_until,
-      image_url: imageUrl || null,
-    });
+    const { data: resourceRow, error } = await supabase
+      .from("staff_resources")
+      .insert({
+        name,
+        category,
+        description: description || null,
+        location: location || null,
+        quantity,
+        available_quantity,
+        status: status || "ACTIVE",
+        purchase_date,
+        purchase_cost,
+        manufacturer: manufacturer || null,
+        serial_number: serialNumber || null,
+        warranty_until,
+        image_url: imageUrl || null,
+      })
+      .select("id")
+      .single();
 
     if (error) {
       return { success: false, error: error.message };
     }
+
+    // Log activity
+    await supabase.rpc("log_activity", {
+      p_action: "CREATE_RESOURCE",
+      p_entity_type: "resource",
+      p_entity_id: resourceRow?.id,
+      p_after_data: { name, category, quantity, status: status || "ACTIVE", location },
+    });
 
     revalidatePath("/manager/resources");
     return { success: true };
@@ -90,6 +102,13 @@ export async function updateResourceAction(
   try {
     const supabase = await createClient();
 
+    // Fetch state before update
+    const { data: beforeResource } = await supabase
+      .from("staff_resources")
+      .select("name, category, quantity, available_quantity, status, location")
+      .eq("id", resourceId)
+      .single();
+
     const { error } = await supabase
       .from("staff_resources")
       .update({
@@ -113,6 +132,15 @@ export async function updateResourceAction(
       return { success: false, error: error.message };
     }
 
+    // Log activity
+    await supabase.rpc("log_activity", {
+      p_action: "UPDATE_RESOURCE",
+      p_entity_type: "resource",
+      p_entity_id: resourceId,
+      p_before_data: beforeResource,
+      p_after_data: { name: data.name, category: data.category, quantity: data.quantity, status: data.status, location: data.location },
+    });
+
     revalidatePath("/manager/resources");
     return { success: true };
   } catch (error: any) {
@@ -130,6 +158,13 @@ export async function toggleResourceStatusAction(
   try {
     const supabase = await createClient();
 
+    // Fetch state before update
+    const { data: beforeResource } = await supabase
+      .from("staff_resources")
+      .select("status")
+      .eq("id", resourceId)
+      .single();
+
     const { error } = await supabase
       .from("staff_resources")
       .update({ status })
@@ -138,6 +173,55 @@ export async function toggleResourceStatusAction(
     if (error) {
       return { success: false, error: error.message };
     }
+
+    // Log activity
+    await supabase.rpc("log_activity", {
+      p_action: "TOGGLE_RESOURCE_STATUS",
+      p_entity_type: "resource",
+      p_entity_id: resourceId,
+      p_before_data: { status: beforeResource?.status },
+      p_after_data: { status },
+    });
+
+    revalidatePath("/manager/resources");
+    return { success: true };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || "An unexpected error occurred.",
+    };
+  }
+}
+
+export async function deleteResourceAction(
+  resourceId: string
+): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+
+    // Fetch details before delete
+    const { data: beforeResource } = await supabase
+      .from("staff_resources")
+      .select("name, category, resource_code")
+      .eq("id", resourceId)
+      .single();
+
+    const { error } = await supabase
+      .from("staff_resources")
+      .delete()
+      .eq("id", resourceId);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    // Log activity
+    await supabase.rpc("log_activity", {
+      p_action: "DELETE_RESOURCE",
+      p_entity_type: "resource",
+      p_entity_id: resourceId,
+      p_before_data: beforeResource,
+    });
 
     revalidatePath("/manager/resources");
     return { success: true };

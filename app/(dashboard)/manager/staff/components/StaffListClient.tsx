@@ -169,9 +169,17 @@ export default function StaffListClient({ initialStaff }: StaffListClientProps) 
                   <tr key={member.id} className="hover:bg-hover/20 transition-colors">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold uppercase text-sm">
-                          {member.name.charAt(0)}
-                        </div>
+                        {member.avatar_url ? (
+                          <img
+                            src={member.avatar_url}
+                            alt={member.name}
+                            className="w-9 h-9 rounded-full object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold uppercase text-sm shrink-0">
+                            {member.name.charAt(0)}
+                          </div>
+                        )}
                         <div>
                           <p className="font-semibold text-heading">{member.name}</p>
                           <p className="text-xs text-muted mt-0.5">{member.email || "No Email"}</p>
@@ -288,7 +296,7 @@ export default function StaffListClient({ initialStaff }: StaffListClientProps) 
               </button>
             </div>
 
-            <form onSubmit={handleFormSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleFormSubmit} encType="multipart/form-data" className="p-6 space-y-4">
               {error && (
                 <div className="p-3 bg-danger/10 border border-danger/20 text-danger rounded-xl text-xs font-semibold flex items-center gap-2">
                   <X className="w-4 h-4 shrink-0" />
@@ -370,6 +378,21 @@ export default function StaffListClient({ initialStaff }: StaffListClientProps) 
                     <option value="LAB_MANAGER">Lab Manager</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Facial Photo (Avatar) */}
+              <div>
+                <label className="block text-xs font-bold text-heading uppercase mb-1.5">
+                  Facial Photo {selectedRole === "DOCTOR" ? "(Required)" : "(Optional)"}
+                </label>
+                <input
+                  type="file"
+                  name="avatar"
+                  accept="image/*"
+                  required={selectedRole === "DOCTOR"}
+                  disabled={isPending}
+                  className="w-full px-3.5 py-2 rounded-xl bg-input border border-input-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer"
+                />
               </div>
 
               {/* Doctor Specific Fields (Slide open conditionally) */}
