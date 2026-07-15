@@ -27,7 +27,7 @@ export async function loginAction(data: LoginSchema) {
       .eq("id", authData.user.id)
       .single();
 
-    return { success: true, user: authData.user, role: profile?.role || "PATIENT" };
+    return { success: true, user: authData.user, role: profile?.role || "CLIENT" };
   } catch (err: any) {
     const isFetchFailed = err?.message?.toLowerCase().includes("fetch failed");
     const errorMessage = isFetchFailed

@@ -20,7 +20,7 @@ const AUTH_PAGES = [
 
 // Map roles to their specific dashboard URL paths
 const ROLE_DASHBOARDS: Record<string, string> = {
-  PATIENT: "/patient",
+  CLIENT: "/client",
   DOCTOR: "/doctor",
   RECEPTIONIST: "/receptionist",
   LAB_MANAGER: "/lab-manager",
@@ -61,8 +61,8 @@ export async function proxy(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    const role = profile?.role || "PATIENT";
-    const userDashboard = ROLE_DASHBOARDS[role] || "/patient";
+    const role = profile?.role || "CLIENT";
+    const userDashboard = ROLE_DASHBOARDS[role] || "/client";
 
     // If user is on landing page "/" or an auth page (login/register), redirect to their dashboard
     if (url === "/" || isAuthPage) {
@@ -71,7 +71,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // Role-based Path Protection:
-    // e.g. A PATIENT should not access /doctor or /manager paths
+    // e.g. A CLIENT should not access /doctor or /manager paths
     const rolePaths = Object.values(ROLE_DASHBOARDS);
     const targetRolePrefix = rolePaths.find(prefix => url.startsWith(prefix));
 

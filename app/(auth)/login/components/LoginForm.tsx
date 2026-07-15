@@ -34,13 +34,13 @@ const LoginForm = () => {
         toast.success("Welcome back! Signing you in...");
         
         const dashboards: Record<string, string> = {
-          PATIENT: "/patient",
+          CLIENT: "/client",
           DOCTOR: "/doctor",
           RECEPTIONIST: "/receptionist",
           LAB_MANAGER: "/lab-manager",
           MANAGER: "/manager"
         };
-        const targetPath = dashboards[response.role || "PATIENT"] || "/patient";
+        const targetPath = dashboards[response.role || "CLIENT"] || "/client";
         
         router.push(targetPath);
         router.refresh();

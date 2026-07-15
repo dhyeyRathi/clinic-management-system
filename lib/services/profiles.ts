@@ -7,7 +7,7 @@ export async function getUserProfile(userId: string) {
     .from("profiles")
     .select(`
       *,
-      patient_profiles:patient_profiles(*),
+      client_profiles:client_profiles(*),
       doctor_profiles:doctor_profiles(*)
     `)
     .eq("id", userId)
@@ -29,11 +29,11 @@ export async function getAllUsers() {
   return data;
 }
 
-export async function getAllPatients() {
+export async function getAllClients() {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from("patient_profiles")
+    .from("client_profiles")
     .select(`
       *,
       profile:profiles(*)
@@ -63,7 +63,7 @@ export async function updateUserProfile(
     name?: string;
     phone?: string;
     avatar_url?: string;
-    role?: "PATIENT" | "DOCTOR" | "RECEPTIONIST" | "LAB_MANAGER" | "MANAGER";
+    role?: "CLIENT" | "DOCTOR" | "RECEPTIONIST" | "LAB_MANAGER" | "MANAGER";
     status?: "ACTIVE" | "INACTIVE" | "SUSPENDED";
   },
   roleSpecificData?: any
@@ -91,13 +91,13 @@ export async function updateUserProfile(
 
     if (roleError) throw new Error(roleError.message);
 
-    if (profile?.role === "PATIENT") {
-      const { error: patientError } = await supabase
-        .from("patient_profiles")
+    if (profile?.role === "CLIENT") {
+      const { error: clientError } = await supabase
+        .from("client_profiles")
         .update(roleSpecificData)
         .eq("user_id", userId);
 
-      if (patientError) throw new Error(patientError.message);
+      if (clientError) throw new Error(clientError.message);
     } else if (profile?.role === "DOCTOR") {
       const { error: doctorError } = await supabase
         .from("doctor_profiles")
@@ -124,9 +124,9 @@ export async function deleteUser(userId: string) {
   return { success: true };
 }
 
-export async function createPatientProfile(data: {
+export async function createClientProfile(data: {
   user_id: string;
-  patient_code?: string;
+  client_code?: string;
   date_of_birth?: string;
   gender: "MALE" | "FEMALE" | "OTHER";
   address?: string;
@@ -136,7 +136,7 @@ export async function createPatientProfile(data: {
   const supabase = await createClient();
 
   const { data: result, error } = await supabase
-    .from("patient_profiles")
+    .from("client_profiles")
     .insert(data)
     .select()
     .single();

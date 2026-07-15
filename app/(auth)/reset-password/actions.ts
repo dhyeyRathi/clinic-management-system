@@ -1,10 +1,10 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { forgotPasswordSchema, ForgotPasswordSchema } from "./schema";
+import { resetPasswordSchema, ResetPasswordSchema } from "./schema";
 
-export async function forgotPasswordAction(data: ForgotPasswordSchema) {
-  const validation = forgotPasswordSchema.safeParse(data);
+export async function resetPasswordAction(data: ResetPasswordSchema) {
+  const validation = resetPasswordSchema.safeParse(data);
   if (!validation.success) {
     return { success: false, error: validation.error.issues[0].message };
   }
@@ -12,12 +12,9 @@ export async function forgotPasswordAction(data: ForgotPasswordSchema) {
   try {
     const supabase = await createClient();
     
-    // Construct reset redirect URL
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    const redirectUrl = `${siteUrl}/auth/callback?next=/reset-password`;
-
-    const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-      redirectTo: redirectUrl,
+    // Update the password of the currently authenticated user
+    const { error } = await supabase.auth.updateUser({
+      password: data.password,
     });
 
     if (error) {

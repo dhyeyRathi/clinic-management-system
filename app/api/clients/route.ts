@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllPatients, createPatientProfile } from "@/lib/services/profiles";
+import { getAllClients, createClientProfile } from "@/lib/services/profiles";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
@@ -16,7 +16,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Verify authorization: Staff, Managers, and Doctors can see patient lists
+    // Verify authorization: Staff, Managers, and Doctors can see client lists
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -28,8 +28,8 @@ export async function GET() {
       return NextResponse.json({ error: "Forbidden: Unauthorized access scope" }, { status: 403 });
     }
 
-    const patients = await getAllPatients();
-    return NextResponse.json(patients);
+    const clients = await getAllClients();
+    return NextResponse.json(clients);
   } catch (err: any) {
     return NextResponse.json({ error: err.message || "An unexpected error occurred" }, { status: 500 });
   }
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       user_id,
-      patient_code,
+      client_code,
       date_of_birth,
       gender,
       address,
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       medical_notes_summary,
     } = body;
 
-    // Verify authorization: Staff / Manager can create for anyone; Patient can only create for their own user_id
+    // Verify authorization: Staff / Manager can create for anyone; Client can only create for their own user_id
     if (user.id !== user_id) {
       const { data: profile } = await supabase
         .from("profiles")
@@ -74,9 +74,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const patientProfile = await createPatientProfile({
+    const clientProfile = await createClientProfile({
       user_id,
-      patient_code,
+      client_code,
       date_of_birth,
       gender,
       address,
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       medical_notes_summary,
     });
 
-    return NextResponse.json(patientProfile, { status: 201 });
+    return NextResponse.json(clientProfile, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || "An unexpected error occurred" }, { status: 500 });
   }

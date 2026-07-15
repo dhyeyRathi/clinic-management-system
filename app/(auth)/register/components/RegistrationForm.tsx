@@ -44,7 +44,7 @@ const RegistrationForm = () => {
         try {
             const response = await registerAction(data);
             if (response.success) {
-                toast.success("Account created successfully!");
+                toast.success("User registered, please confirm your email address before logging in");
                 setIsSuccess(true);
                 reset();
             } else {
@@ -61,9 +61,9 @@ const RegistrationForm = () => {
                 <div className="w-16 h-16 bg-success/10 text-success rounded-full flex items-center justify-center mb-6">
                     <CheckCircle className="w-10 h-10" />
                 </div>
-                <h2 className="text-2xl font-bold text-heading mb-2">Registration Complete!</h2>
+                <h2 className="text-2xl font-bold text-heading mb-2">User Registered!</h2>
                 <p className="text-body text-sm mb-8">
-                    Your patient account has been created successfully. Please check your email inbox to verify your account before logging in.
+                    User registered, please confirm your email address before logging in.
                 </p>
                 <Link
                     href="/login"

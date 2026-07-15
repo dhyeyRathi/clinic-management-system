@@ -20,7 +20,7 @@ export async function registerAction(data: RegisterSchema) {
             options: {
                 data: {
                     name: data.name,
-                    role: "PATIENT" // Default role for registration is PATIENT
+                    role: "CLIENT" // Default role for registration is CLIENT
                 }
             }
         });
