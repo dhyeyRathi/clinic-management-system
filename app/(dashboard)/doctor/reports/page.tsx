@@ -28,19 +28,40 @@ export default async function ReportsPage() {
     );
   }
 
-  // Fetch all active clients for report targets selection
-  const { data: clients } = await supabase
-    .from("client_profiles")
+  // Fetch only clients who have had at least one appointment with this specific doctor
+  const { data: clientAppointments } = await supabase
+    .from("appointments")
     .select(`
-      id,
-      client_code,
-      profiles!inner (
-        name,
-        email,
-        status
+      client_profiles!inner (
+        id,
+        client_code,
+        profiles!inner (
+          name,
+          email,
+          status
+        )
       )
     `)
-    .eq("profiles.status", "ACTIVE");
+    .eq("doctor_id", doctorProfile.id)
+    .eq("client_profiles.profiles.status", "ACTIVE");
+
+  // Filter unique clients
+  const uniqueClientsMap = new Map<string, any>();
+  (clientAppointments || []).forEach((app: any) => {
+    const cp = app.client_profiles;
+    const clientInfo = Array.isArray(cp) ? cp[0] : cp;
+    if (clientInfo && !uniqueClientsMap.has(clientInfo.id)) {
+      const profile = Array.isArray(clientInfo.profiles) ? clientInfo.profiles[0] : clientInfo.profiles;
+      uniqueClientsMap.set(clientInfo.id, {
+        id: clientInfo.id,
+        client_code: clientInfo.client_code,
+        name: profile?.name || "Unknown Patient",
+        email: profile?.email || "",
+      });
+    }
+  });
+
+  const formattedClients = Array.from(uniqueClientsMap.values());
 
   // Fetch active lab test types catalog to let doctor select recommendations
   const { data: labTests } = await supabase
@@ -86,16 +107,7 @@ export default async function ReportsPage() {
     };
   });
 
-  // Format active clients selection dropdown
-  const formattedClients = (clients || []).map((c: any) => {
-    const profile = Array.isArray(c.profiles) ? c.profiles[0] : c.profiles;
-    return {
-      id: c.id,
-      client_code: c.client_code,
-      name: profile?.name || "Unknown Patient",
-      email: profile?.email || "",
-    };
-  });
+
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl">
