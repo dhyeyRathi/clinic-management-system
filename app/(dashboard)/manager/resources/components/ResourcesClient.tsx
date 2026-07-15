@@ -48,7 +48,7 @@ export default function ResourcesClient({
 }: ResourcesClientProps) {
   const [resources, setResources] = useState(initialResources);
   const [requests, setRequests] = useState(initialRequests);
-  const [activeTab, setActiveTab] = useState<"inventory" | "requests">("inventory");
+  const [activeTab, setActiveTab] = useState<"inventory" | "requests" | "allocations">("inventory");
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -286,6 +286,21 @@ export default function ResourcesClient({
             </span>
           )}
         </button>
+        <button
+          onClick={() => setActiveTab("allocations")}
+          className={`px-4 py-2 text-sm font-bold border-b-2 transition-all cursor-pointer relative flex items-center gap-1.5 ${
+            activeTab === "allocations"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted hover:text-heading"
+          }`}
+        >
+          <span>Active Allocations</span>
+          {requests.filter((r) => r.status === "APPROVED").length > 0 && (
+            <span className="px-1.5 py-0.5 bg-success text-white dark:text-background text-[10px] font-extrabold rounded-full">
+              {requests.filter((r) => r.status === "APPROVED").length}
+            </span>
+          )}
+        </button>
       </div>
 
       {activeTab === "inventory" ? (
@@ -493,7 +508,7 @@ export default function ResourcesClient({
             </div>
           )}
         </>
-      ) : (
+      ) : activeTab === "requests" ? (
         /* Requests queue list */
         <div className="bg-card border border-border rounded-3xl shadow-sm overflow-hidden">
           {requests.length === 0 ? (
@@ -533,7 +548,7 @@ export default function ResourcesClient({
                           {req.reason || "N/A"}
                         </td>
                         <td className="py-4 px-5 text-muted">
-                          {new Date(req.created_at).toLocaleDateString([], {
+                          {new Date(req.created_at).toLocaleDateString('en-US', {
                             dateStyle: "medium",
                           })}
                         </td>
@@ -578,6 +593,68 @@ export default function ResourcesClient({
                       </tr>
                     );
                   })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Active Allocations List */
+        <div className="bg-card border border-border rounded-3xl shadow-sm overflow-hidden">
+          {requests.filter((r) => r.status === "APPROVED").length === 0 ? (
+            <div className="p-12 text-center text-muted flex flex-col items-center justify-center gap-3">
+              <ClipboardList className="w-12 h-12 text-muted/40" />
+              <p className="text-sm font-medium">No active allocations found.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-hover border-b border-border text-muted font-bold uppercase tracking-wider">
+                    <th className="py-3 px-5">Resource (Asset)</th>
+                    <th className="py-3 px-5">Allocated To</th>
+                    <th className="py-3 px-5 text-center">Allocated Qty</th>
+                    <th className="py-3 px-5">Allocation Purpose</th>
+                    <th className="py-3 px-5">Allocation Date</th>
+                    <th className="py-3 px-5">Admin Notes</th>
+                    <th className="py-3 px-5 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {requests
+                    .filter((r) => r.status === "APPROVED")
+                    .map((req) => {
+                      const reqRole = req.requester.role.replace("_", " ").toLowerCase().replace(/\b\w/g, (c: string) => c.toUpperCase());
+                      return (
+                        <tr key={req.id} className="text-heading font-medium hover:bg-hover/10 transition-colors">
+                          <td className="py-4 px-5">
+                            <p className="font-bold text-heading">{req.resource.name}</p>
+                            <span className="text-[10px] text-muted font-mono">{req.resource.resource_code}</span>
+                          </td>
+                          <td className="py-4 px-5">
+                            <p className="font-semibold">{req.requester.name}</p>
+                            <span className="text-[10px] text-primary font-bold">{reqRole}</span>
+                          </td>
+                          <td className="py-4 px-5 text-center font-bold text-success">{req.quantity}</td>
+                          <td className="py-4 px-5 max-w-xs truncate" title={req.reason}>
+                            {req.reason || "N/A"}
+                          </td>
+                          <td className="py-4 px-5 text-muted">
+                            {new Date(req.created_at).toLocaleDateString('en-US', {
+                              dateStyle: "medium",
+                            })}
+                          </td>
+                          <td className="py-4 px-5 text-muted">
+                            {req.admin_notes || "N/A"}
+                          </td>
+                          <td className="py-4 px-5 text-center">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-success/10 text-success border-success/20">
+                              <span>ACTIVE</span>
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>

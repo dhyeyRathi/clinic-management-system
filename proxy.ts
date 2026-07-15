@@ -64,8 +64,8 @@ export async function proxy(request: NextRequest) {
     const role = profile?.role || "CLIENT";
     const userDashboard = ROLE_DASHBOARDS[role] || "/client";
 
-    // If user is on landing page "/" or an auth page (login/register), redirect to their dashboard
-    if (url === "/" || isAuthPage) {
+    // If user is on an auth page (login/register), redirect to their dashboard
+    if (isAuthPage) {
       if (url.startsWith("/reset-password")) {
         return NextResponse.next();
       }

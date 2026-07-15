@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { cloudinary } from "@/lib/cloudinary";
+import { generateInvoicePdfBuffer } from "@/lib/invoice-pdf";
 
 export interface ActionResponse {
   success: boolean;
@@ -27,10 +28,10 @@ export async function updateConsultationAction(
       return { success: false, error: "Unauthorized." };
     }
 
-    // Retrieve doctor profile ID
+    // Retrieve doctor profile ID and consultation fee details
     const { data: doctorProfile } = await supabase
       .from("doctor_profiles")
-      .select("id")
+      .select("id, consultation_fee, specialization, profiles(name)")
       .eq("user_id", user.id)
       .single();
 
@@ -38,10 +39,10 @@ export async function updateConsultationAction(
       return { success: false, error: "Doctor profile not found." };
     }
 
-    // Fetch before data for logs
+    // Fetch before data for logs and invoice generation details
     const { data: beforeData } = await supabase
       .from("appointments")
-      .select("status, notes")
+      .select("status, notes, client_id, scheduled_at")
       .eq("id", appointmentId)
       .eq("doctor_id", doctorProfile.id)
       .single();
@@ -70,17 +71,124 @@ export async function updateConsultationAction(
       return { success: false, error: updateError.message };
     }
 
+    // If status is transitioning to COMPLETED, auto-create a consultation invoice
+    if (status === "COMPLETED" && beforeData.status !== "COMPLETED") {
+      const fee = Number(doctorProfile.consultation_fee) || 0;
+      if (fee > 0) {
+        try {
+          const adminSupabase = supabase;
+          const invoiceNo = "INV-" + Date.now().toString().slice(-8);
+
+          const { data: invoice, error: invoiceError } = await adminSupabase
+            .from("invoices")
+            .insert({
+              invoice_no: invoiceNo,
+              client_id: beforeData.client_id,
+              doctor_id: doctorProfile.id,
+              subtotal: fee,
+              tax: 0.00,
+              discount: 0.00,
+              total: fee,
+              payment_status: "UNPAID",
+              created_by: user.id,
+            })
+            .select("id")
+            .single();
+
+          if (invoiceError) {
+            console.error("Auto-invoice generation failed:", invoiceError.message);
+          } else if (invoice) {
+            const doctorName = (doctorProfile.profiles as any)?.name || "Practitioner";
+            const { error: itemError } = await adminSupabase
+              .from("invoice_items")
+              .insert({
+                invoice_id: invoice.id,
+                item_type: "CONSULTATION",
+                description: `Consultation with Dr. ${doctorName} (${doctorProfile.specialization || "Specialist"})`,
+                unit_price: fee,
+                quantity: 1,
+                total_price: fee,
+              });
+
+            if (itemError) {
+              console.error("Auto-invoice line item generation failed:", itemError.message);
+            }
+
+            // Auto-generate invoice PDF & Upload to Cloudinary
+            try {
+              const { data: clientInfo } = await adminSupabase
+                .from("client_profiles")
+                .select("client_code, profiles(name)")
+                .eq("id", beforeData.client_id)
+                .single();
+
+              const clientName = (clientInfo?.profiles as any)?.name || "Patient";
+              const clientCode = clientInfo?.client_code || "Unknown MRN";
+
+              const pdfBuffer = generateInvoicePdfBuffer({
+                invoice_no: invoiceNo,
+                client_name: clientName,
+                client_code: clientCode,
+                subtotal: fee,
+                tax: 0.00,
+                discount: 0.00,
+                total: fee,
+                items: [{
+                  item_type: "CONSULTATION",
+                  description: `Consultation with Dr. ${doctorName} (${doctorProfile.specialization || "Specialist"})`,
+                  unit_price: fee,
+                  quantity: 1,
+                  total_price: fee,
+                }],
+                created_at: new Date().toISOString(),
+              });
+
+              const uploadResult = await new Promise<any>((resolve, reject) => {
+                cloudinary.uploader.upload_stream(
+                  { folder: "pdfs/client_invoices", resource_type: "raw" },
+                  (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                  }
+                ).end(pdfBuffer);
+              });
+
+              if (uploadResult?.secure_url) {
+                await adminSupabase
+                  .from("invoices")
+                  .update({ pdf_url: uploadResult.secure_url })
+                  .eq("id", invoice.id);
+              }
+            } catch (pdfErr) {
+              console.error("Failed to auto-generate and upload doctor consultation invoice PDF:", pdfErr);
+            }
+          }
+        } catch (invoiceErr) {
+          console.error("Auto-invoice execution flow crashed:", invoiceErr);
+        }
+      }
+    }
+
     // Log action
     await supabase.rpc("log_activity", {
       p_action: `DOCTOR_APPOINTMENT_${status}`,
       p_entity_type: "appointment",
       p_entity_id: appointmentId,
-      p_before_data: beforeData,
+      p_before_data: { status: beforeData.status, notes: beforeData.notes },
       p_after_data: updateFields,
     });
 
+    // Revalidate paths to update cache and reflect new billings/revenue on all roles
     revalidatePath("/doctor/appointments");
     revalidatePath("/doctor");
+    revalidatePath("/manager/finance");
+    revalidatePath("/manager/analytics");
+    revalidatePath("/manager");
+    revalidatePath("/client/invoices");
+    revalidatePath("/client");
+    revalidatePath("/receptionist/invoices");
+    revalidatePath("/receptionist");
+
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || "Failed to update consultation." };

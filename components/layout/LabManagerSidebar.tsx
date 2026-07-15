@@ -6,12 +6,14 @@ import {
   FlaskConical,
   Boxes,
   User,
+  FileText,
 } from "lucide-react";
 
 const labManagerNavItems: NavItem[] = [
   { label: "Overview",       href: "/lab-manager",           icon: LayoutDashboard },
   { label: "Lab Test Catalog", href: "/lab-manager/tests",     icon: FlaskConical },
   { label: "Resources",      href: "/lab-manager/resources", icon: Boxes },
+  { label: "Lab Reports",      href: "/lab-manager/reports",   icon: FileText },
   { label: "My Profile",     href: "/lab-manager/profile",   icon: User },
 ];
 

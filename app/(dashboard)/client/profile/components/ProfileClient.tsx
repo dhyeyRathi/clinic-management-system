@@ -40,6 +40,16 @@ export default function ProfileClient({ profile }: ProfileClientProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();
 
+  // Dirty state: true when user has unsaved changes
+  const isDirty =
+    name !== profile.name ||
+    phone !== (profile.phone || "") ||
+    dateOfBirth !== (clientData?.date_of_birth || "") ||
+    gender !== (clientData?.gender || "OTHER") ||
+    address !== (clientData?.address || "") ||
+    emergencyContact !== (clientData?.emergency_contact || "") ||
+    avatarFile !== null;
+
   // Image change handler
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -271,21 +281,24 @@ export default function ProfileClient({ profile }: ProfileClientProps) {
             </div>
 
             {/* Save Buttons */}
-            <div className="flex justify-end pt-4">
+            <div className="flex items-center justify-end gap-3 pt-4">
+              {isDirty && !isPending && (
+                <p className="text-xs text-warning font-medium">You have unsaved changes.</p>
+              )}
               <button
                 type="submit"
-                disabled={isPending}
-                className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white dark:text-background px-6 py-3 rounded-xl text-sm font-semibold shadow-sm hover:shadow active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all cursor-pointer"
+                disabled={!isDirty || isPending}
+                className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white dark:text-background px-6 py-3 rounded-xl text-sm font-semibold shadow-sm hover:shadow active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
                 {isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Saving Changes...</span>
+                    <span>Saving...</span>
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    <span>Save Profile</span>
+                    <span>{isDirty ? "Save Changes" : "No Changes"}</span>
                   </>
                 )}
               </button>

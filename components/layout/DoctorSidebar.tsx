@@ -8,6 +8,7 @@ import {
   User,
   Users,
   Boxes,
+  Receipt,
 } from "lucide-react";
 
 const doctorNavItems: NavItem[] = [
@@ -15,6 +16,7 @@ const doctorNavItems: NavItem[] = [
   { label: "Patients",       href: "/doctor/patients",      icon: Users },
   { label: "Appointments",   href: "/doctor/appointments",  icon: CalendarDays },
   { label: "Clinical Reports", href: "/doctor/reports",       icon: FileText },
+  { label: "Billing & Invoices", href: "/doctor/invoices",    icon: Receipt },
   { label: "Resources",      href: "/doctor/resources",     icon: Boxes },
   { label: "My Profile",     href: "/doctor/profile",       icon: User },
 ];

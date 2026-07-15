@@ -73,6 +73,17 @@ export default function DoctorProfileClient({ profile }: DoctorProfileClientProp
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();
 
+  // Dirty state: true only when values differ from what was last saved
+  const originalAvailabilityJson = JSON.stringify(docData?.availability || []);
+  const isDirty =
+    name !== profile.name ||
+    phone !== (profile.phone || "") ||
+    specialization !== (docData?.specialization || "") ||
+    qualifications !== (docData?.qualifications || "") ||
+    consultationFee !== (docData?.consultation_fee ? String(docData.consultation_fee) : "0") ||
+    JSON.stringify(availability) !== originalAvailabilityJson ||
+    avatarFile !== null;
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -375,11 +386,14 @@ export default function DoctorProfileClient({ profile }: DoctorProfileClientProp
             </div>
 
             {/* Save Buttons */}
-            <div className="flex justify-end pt-4 border-t border-border/40">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border/40">
+              {isDirty && !isPending && (
+                <p className="text-xs text-warning font-medium">You have unsaved changes.</p>
+              )}
               <button
                 type="submit"
-                disabled={isPending}
-                className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white dark:text-background px-6 py-3 rounded-xl text-sm font-semibold shadow-sm hover:shadow active:scale-95 disabled:opacity-50 transition-all cursor-pointer"
+                disabled={!isDirty || isPending}
+                className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white dark:text-background px-6 py-3 rounded-xl text-sm font-semibold shadow-sm hover:shadow active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
                 {isPending ? (
                   <>
@@ -389,7 +403,7 @@ export default function DoctorProfileClient({ profile }: DoctorProfileClientProp
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    <span>Save Profile Changes</span>
+                    <span>{isDirty ? "Save Changes" : "No Changes"}</span>
                   </>
                 )}
               </button>

@@ -16,7 +16,7 @@ export default async function LabTestsPage() {
   // Fetch only active lab test types for client directory
   const { data: tests } = await supabase
     .from("lab_test_types")
-    .select("id, name, description, price, image_url")
+    .select("id, name, description, price, image_url, doctor_order_required")
     .eq("status", "ACTIVE")
     .order("name", { ascending: true });
 

@@ -2,6 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { cloudinary } from "@/lib/cloudinary";
+import { generateInvoicePdfBuffer } from "@/lib/invoice-pdf";
 
 export interface ActionResponse {
   success: boolean;
@@ -203,7 +205,7 @@ export async function receptionistCreateInvoiceAction(
   tax: number,
   discount: number,
   total: number,
-  paymentStatus: "PAID" | "UNPAID" | "PARTIAL",
+  paymentStatus: "PAID" | "UNPAID" | "PARTIAL" | "NOT_STARTED" | "PENDING_APPROVAL",
   paymentMethod: "CASH" | "CARD" | "ONLINE" | "INSURANCE" | null,
   items: Array<{
     item_type: "CONSULTATION" | "LAB_TEST" | "MEDICINE" | "OTHER";
@@ -211,7 +213,8 @@ export async function receptionistCreateInvoiceAction(
     unit_price: number;
     quantity: number;
     total_price: number;
-  }>
+  }>,
+  doctorId?: string
 ): Promise<ActionResponse> {
   if (!clientProfileId || items.length === 0) {
     return { success: false, error: "Client selection and billing items are required." };
@@ -229,6 +232,7 @@ export async function receptionistCreateInvoiceAction(
       .insert({
         invoice_no: invoiceNo,
         client_id: clientProfileId,
+        doctor_id: doctorId || null,
         subtotal,
         tax,
         discount,
@@ -260,6 +264,49 @@ export async function receptionistCreateInvoiceAction(
 
     if (itemsError) {
       console.error("Failed to insert invoice items:", itemsError.message);
+    }
+
+    // Auto-generate invoice PDF & Upload to Cloudinary
+    try {
+      const { data: clientInfo } = await supabase
+        .from("client_profiles")
+        .select("client_code, profiles(name)")
+        .eq("id", clientProfileId)
+        .single();
+
+      const clientName = (clientInfo?.profiles as any)?.name || "Patient";
+      const clientCode = clientInfo?.client_code || "Unknown MRN";
+
+      const pdfBuffer = generateInvoicePdfBuffer({
+        invoice_no: invoiceNo,
+        client_name: clientName,
+        client_code: clientCode,
+        subtotal,
+        tax,
+        discount,
+        total,
+        items,
+        created_at: new Date().toISOString(),
+      });
+
+      const uploadResult = await new Promise<any>((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "pdfs/client_invoices", resource_type: "raw" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(pdfBuffer);
+      });
+
+      if (uploadResult?.secure_url) {
+        await supabase
+          .from("invoices")
+          .update({ pdf_url: uploadResult.secure_url })
+          .eq("id", invoice.id);
+      }
+    } catch (pdfErr) {
+      console.error("Failed to auto-generate and upload invoice PDF:", pdfErr);
     }
 
     await supabase.rpc("log_activity", {

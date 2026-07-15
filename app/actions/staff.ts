@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
-import { sendStaffWelcomeEmail } from "@/lib/email";
+
 import { cloudinary } from "@/lib/cloudinary";
 
 export interface ActionResponse {

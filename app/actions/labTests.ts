@@ -19,6 +19,8 @@ export async function createLabTestTypeAction(
   const status = formData.get("status") as "ACTIVE" | "INACTIVE";
   const imageFile = formData.get("image") as File | null;
 
+  const doctorOrderRequired = formData.get("doctorOrderRequired") === "true";
+
   if (!name || !priceStr) {
     return { success: false, error: "Name and Price are required fields." };
   }
@@ -66,6 +68,7 @@ export async function createLabTestTypeAction(
         status: status || "ACTIVE",
         image_url: imageUrl,
         created_by: user?.id,
+        doctor_order_required: doctorOrderRequired,
       })
       .select("id")
       .single();
@@ -101,6 +104,8 @@ export async function updateLabTestTypeAction(
   const priceStr = formData.get("price") as string;
   const status = formData.get("status") as "ACTIVE" | "INACTIVE";
   const imageFile = formData.get("image") as File | null;
+
+  const doctorOrderRequired = formData.get("doctorOrderRequired") === "true";
 
   if (!name || !priceStr) {
     return { success: false, error: "Name and Price are required fields." };
@@ -148,6 +153,7 @@ export async function updateLabTestTypeAction(
         price,
         status,
         image_url: imageUrl,
+        doctor_order_required: doctorOrderRequired,
       })
       .eq("id", testId);
 
@@ -201,11 +207,98 @@ export async function toggleLabTestTypeStatusAction(
     });
 
     revalidatePath("/manager/lab-tests");
-    return { success: true };
+    return {success: true};
   } catch (error: any) {
     return {
       success: false,
       error: error.message || "An unexpected error occurred.",
     };
+  }
+}
+
+export async function bookLabTestTypeAction(testTypeId: string): Promise<ActionResponse> {
+  try {
+    const supabase = await createClient();
+    
+    // Auth Check
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Unauthorized." };
+
+    // Resolve client
+    const { data: clientProfile } = await supabase
+      .from("client_profiles")
+      .select(`
+        id,
+        client_code,
+        profiles:user_id (
+          name
+        )
+      `)
+      .eq("user_id", user.id)
+      .single();
+
+    if (!clientProfile) return { success: false, error: "Patient profile not found." };
+
+    // Resolve test details
+    const { data: testType } = await supabase
+      .from("lab_test_types")
+      .select("name, price, doctor_order_required")
+      .eq("id", testTypeId)
+      .single();
+
+    if (!testType) return { success: false, error: "Lab test type not found." };
+
+    if (testType.doctor_order_required) {
+      return { success: false, error: "This test requires a doctor's order to be booked." };
+    }
+
+    const price = Number(testType.price);
+    const invoiceNo = "INV-" + Date.now().toString().slice(-8);
+
+    // Create Invoice
+    const { data: invoice, error: invoiceError } = await supabase
+      .from("invoices")
+      .insert({
+        invoice_no: invoiceNo,
+        client_id: clientProfile.id,
+        subtotal: price,
+        tax: 0,
+        discount: 0,
+        total: price,
+        payment_status: "NOT_STARTED",
+        created_by: user.id,
+      })
+      .select("id")
+      .single();
+
+    if (invoiceError) return { success: false, error: invoiceError.message };
+
+    // Create Invoice Item
+    const { error: itemError } = await supabase
+      .from("invoice_items")
+      .insert({
+        invoice_id: invoice.id,
+        item_type: "LAB_TEST",
+        reference_id: testTypeId,
+        description: testType.name,
+        unit_price: price,
+        quantity: 1,
+        total_price: price,
+      });
+
+    if (itemError) return { success: false, error: itemError.message };
+
+    // Log Activity
+    await supabase.rpc("log_activity", {
+      p_action: "CLIENT_BOOK_LAB_TEST",
+      p_entity_type: "invoice",
+      p_entity_id: invoice.id,
+      p_after_data: { test_type_id: testTypeId, price },
+    });
+
+    revalidatePath("/client/invoices");
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || "An unexpected error occurred." };
   }
 }

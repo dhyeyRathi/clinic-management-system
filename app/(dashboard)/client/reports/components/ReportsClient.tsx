@@ -98,7 +98,7 @@ export default function ReportsClient({ initialReports }: ReportsClientProps) {
                   <span>
                     Uploaded on:{" "}
                     <strong className="text-heading font-medium">
-                      {new Date(report.created_at).toLocaleDateString([], {
+                      {new Date(report.created_at).toLocaleDateString('en-US', {
                         dateStyle: "medium",
                       })}
                     </strong>

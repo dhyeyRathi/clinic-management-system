@@ -7,10 +7,13 @@ import { createClient } from "@supabase/supabase-js";
  */
 export function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const serviceRoleKey = 
+    process.env.SUPABASE_SERVICE_ROLE_KEY || 
+    process.env.NEXT_SUPABASE_SERVICE_ROLE_KEY || 
+    process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
 
   if (!serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set in environment variables.");
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set in environment variables (checked SUPABASE_SERVICE_ROLE_KEY, NEXT_SUPABASE_SERVICE_ROLE_KEY, and NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY).");
   }
 
   return createClient(supabaseUrl, serviceRoleKey, {

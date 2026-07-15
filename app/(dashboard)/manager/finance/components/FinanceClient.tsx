@@ -38,9 +38,9 @@ export default function FinanceClient({ initialInvoices }: FinanceClientProps) {
     return matchesSearch && matchesStatus;
   });
 
-  async function handleMarkAsPaid(invoiceId: string) {
+  async function handleMarkAsPaid(invoiceId: string, method: string = "CASH") {
     startTransition(async () => {
-      const result = await updateInvoiceStatusAction(invoiceId, "PAID", "CASH");
+      const result = await updateInvoiceStatusAction(invoiceId, "PAID", method as any);
       if (result.success) {
         toast.success("Invoice marked as PAID!");
         setInvoices((prev) =>
@@ -54,7 +54,7 @@ export default function FinanceClient({ initialInvoices }: FinanceClientProps) {
           setSelectedInvoice((prev: any) => ({
             ...prev,
             payment_status: "PAID",
-            payment_method: "CASH",
+            payment_method: method,
           }));
         }
       } else {
@@ -66,6 +66,8 @@ export default function FinanceClient({ initialInvoices }: FinanceClientProps) {
   const statusColors: Record<string, string> = {
     PAID: "bg-success/15 text-success border-success/20",
     UNPAID: "bg-danger/15 text-danger border-danger/20",
+    NOT_STARTED: "bg-danger/15 text-danger border-danger/20",
+    PENDING_APPROVAL: "bg-warning/15 text-warning border-warning/20",
     PARTIAL: "bg-warning/15 text-warning border-warning/20",
     REFUNDED: "bg-muted/15 text-muted border-border",
   };
@@ -101,6 +103,8 @@ export default function FinanceClient({ initialInvoices }: FinanceClientProps) {
               <option value="ALL">All Payments</option>
               <option value="PAID">Paid</option>
               <option value="UNPAID">Unpaid</option>
+              <option value="NOT_STARTED">Not Started</option>
+              <option value="PENDING_APPROVAL">Pending Approval</option>
               <option value="PARTIAL">Partial</option>
               <option value="REFUNDED">Refunded</option>
             </select>
@@ -301,9 +305,9 @@ export default function FinanceClient({ initialInvoices }: FinanceClientProps) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {selectedInvoice.payment_status !== "PAID" && (
+                  {selectedInvoice.payment_status === "PENDING_APPROVAL" && (
                     <button
-                      onClick={() => handleMarkAsPaid(selectedInvoice.id)}
+                      onClick={() => handleMarkAsPaid(selectedInvoice.id, selectedInvoice.payment_method || "ONLINE")}
                       disabled={isPending}
                       className="flex items-center gap-1.5 bg-success text-white dark:text-background hover:bg-success/90 px-3.5 py-1.5 rounded-lg text-xs font-bold active:scale-95 transition-all cursor-pointer disabled:opacity-50"
                     >
@@ -312,7 +316,21 @@ export default function FinanceClient({ initialInvoices }: FinanceClientProps) {
                       ) : (
                         <CheckCircle className="w-3.5 h-3.5" />
                       )}
-                      <span>Collect Payment</span>
+                      <span>Approve Payment</span>
+                    </button>
+                  )}
+                  {(selectedInvoice.payment_status === "UNPAID" || selectedInvoice.payment_status === "NOT_STARTED") && (
+                    <button
+                      onClick={() => handleMarkAsPaid(selectedInvoice.id, "CASH")}
+                      disabled={isPending}
+                      className="flex items-center gap-1.5 bg-success text-white dark:text-background hover:bg-success/90 px-3.5 py-1.5 rounded-lg text-xs font-bold active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                    >
+                      {isPending ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle className="w-3.5 h-3.5" />
+                      )}
+                      <span>Collect Cash</span>
                     </button>
                   )}
                   <button

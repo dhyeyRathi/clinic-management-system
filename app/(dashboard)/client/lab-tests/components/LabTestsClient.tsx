@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { FlaskConical, Search, AlertCircle, DollarSign } from "lucide-react";
+import { useState, useTransition } from "react";
+import { FlaskConical, Search, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { bookLabTestTypeAction } from "@/app/actions/labTests";
+import { toast } from "sonner";
 
 interface LabTestType {
   id: string;
@@ -9,6 +11,7 @@ interface LabTestType {
   description: string | null;
   price: any;
   image_url: string | null;
+  doctor_order_required: boolean;
 }
 
 interface LabTestsClientProps {
@@ -18,12 +21,24 @@ interface LabTestsClientProps {
 export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
   const [tests] = useState(initialTests);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   const filteredTests = tests.filter((test) => {
     const nameMatch = test.name.toLowerCase().includes(searchQuery.toLowerCase());
     const descMatch = test.description?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
     return nameMatch || descMatch;
   });
+
+  const handleBookDirect = (testId: string) => {
+    startTransition(async () => {
+      const res = await bookLabTestTypeAction(testId);
+      if (res.success) {
+        toast.success("Lab test booked! Go to Invoices to complete the payment.");
+      } else {
+        toast.error(res.error || "Failed to book lab test.");
+      }
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -90,10 +105,38 @@ export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
                 </div>
               </div>
 
-              {/* Notice Banner */}
-              <div className="px-5 py-3.5 bg-hover/30 border-t border-border flex items-center gap-2 text-[10px] text-muted">
-                <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
-                <span>Doctor order required to run.</span>
+              {/* Action/Notice Footer */}
+              <div className="px-5 py-3.5 bg-hover/30 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-[10px] text-muted">
+                  {test.doctor_order_required ? (
+                    <>
+                      <AlertCircle className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span>Doctor order required to run.</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <span className="text-emerald-600 font-medium">Direct Patient Booking Allowed</span>
+                    </>
+                  )}
+                </div>
+
+                {!test.doctor_order_required && (
+                  <button
+                    onClick={() => handleBookDirect(test.id)}
+                    disabled={isPending}
+                    className="w-full sm:w-auto bg-primary hover:bg-primary-hover text-white text-[10px] font-bold px-3 py-1.5 rounded-lg active:scale-95 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  >
+                    {isPending ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Booking...</span>
+                      </>
+                    ) : (
+                      <span>Book Test</span>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           ))}

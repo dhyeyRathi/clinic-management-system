@@ -134,7 +134,7 @@ export default function LabManagerResourcesClient({
                     {r.warranty_until && (
                       <p className="flex items-center gap-2">
                         <Calendar className="w-3.5 h-3.5 text-muted/80 shrink-0" />
-                        <span>Warranty: <strong className="text-heading font-medium">{new Date(r.warranty_until).toLocaleDateString([], { dateStyle: "medium" })}</strong></span>
+                        <span>Warranty: <strong className="text-heading font-medium">{new Date(r.warranty_until).toLocaleDateString('en-US', { dateStyle: "medium" })}</strong></span>
                       </p>
                     )}
                   </div>

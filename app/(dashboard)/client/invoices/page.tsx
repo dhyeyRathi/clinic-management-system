@@ -41,6 +41,7 @@ export default async function InvoicesPage() {
       payment_status,
       payment_method,
       created_at,
+      pdf_url,
       invoice_items (
         id,
         item_type,

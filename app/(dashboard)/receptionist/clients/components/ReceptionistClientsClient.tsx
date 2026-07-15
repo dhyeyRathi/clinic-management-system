@@ -181,7 +181,7 @@ export default function ReceptionistClientsClient({
                   <p className="flex items-center gap-2">
                     <Calendar className="w-3.5 h-3.5 text-muted/80 shrink-0" />
                     <span>
-                      DOB: {new Date(c.date_of_birth).toLocaleDateString([], { dateStyle: "medium" })}
+                      DOB: {new Date(c.date_of_birth).toLocaleDateString('en-US', { dateStyle: "medium" })}
                     </span>
                   </p>
                 )}

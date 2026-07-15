@@ -26,6 +26,7 @@ export default async function InvoicesPage() {
       payment_status,
       payment_method,
       created_at,
+      pdf_url,
       client_profiles (
         client_code,
         profiles (
@@ -76,6 +77,7 @@ export default async function InvoicesPage() {
       payment_status: inv.payment_status,
       payment_method: inv.payment_method,
       created_at: inv.created_at,
+      pdf_url: inv.pdf_url,
       client: {
         id: clientInfo?.id || "",
         client_code: clientInfo?.client_code || "Unknown MRN",
@@ -95,6 +97,30 @@ export default async function InvoicesPage() {
     };
   });
 
+  // Fetch active doctors list for invoice assignment
+  const { data: doctors } = await supabase
+    .from("doctor_profiles")
+    .select(`
+      id,
+      specialization,
+      profiles!inner (
+        name,
+        status,
+        role
+      )
+    `)
+    .eq("profiles.status", "ACTIVE")
+    .eq("profiles.role", "DOCTOR");
+
+  const formattedDoctors = (doctors || []).map((doc: any) => {
+    const profile = Array.isArray(doc.profiles) ? doc.profiles[0] : doc.profiles;
+    return {
+      id: doc.id,
+      name: profile?.name || "Unknown Doctor",
+      specialization: doc.specialization || "",
+    };
+  });
+
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl">
       <div>
@@ -107,6 +133,7 @@ export default async function InvoicesPage() {
       <ReceptionistInvoicesClient
         invoices={formattedInvoices}
         clients={formattedClients}
+        doctors={formattedDoctors}
       />
     </div>
   );

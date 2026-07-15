@@ -202,7 +202,7 @@ export default function DoctorReportsClient({
 
                 <div className="flex items-center gap-1.5 text-xs text-muted pl-1">
                   <Calendar className="w-3.5 h-3.5" />
-                  <span>Issued on: {new Date(rep.created_at).toLocaleDateString([], { dateStyle: "medium" })}</span>
+                  <span suppressHydrationWarning>Issued on: {new Date(rep.created_at).toLocaleDateString('en-US', { dateStyle: "medium" })}</span>
                 </div>
               </div>
 

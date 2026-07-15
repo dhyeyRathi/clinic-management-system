@@ -182,6 +182,14 @@ export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
                   {test.status}
                 </span>
 
+                <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                  test.doctor_order_required
+                    ? "bg-primary/10 text-primary"
+                    : "bg-emerald-500/10 text-emerald-500"
+                }`}>
+                  {test.doctor_order_required ? "Order Required" : "Direct Booking"}
+                </span>
+
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setEditingTest(test)}
@@ -321,6 +329,20 @@ export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
                 </select>
               </div>
 
+              <div className="flex items-center gap-2 py-1">
+                <input
+                  type="checkbox"
+                  id="add-doctorOrderRequired"
+                  name="doctorOrderRequired"
+                  value="true"
+                  disabled={isPending}
+                  className="w-4 h-4 text-primary bg-input border-input-border rounded focus:ring-primary cursor-pointer"
+                />
+                <label htmlFor="add-doctorOrderRequired" className="text-sm font-semibold text-heading cursor-pointer select-none">
+                  Doctor order required to run
+                </label>
+              </div>
+
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
                 <button
                   type="button"
@@ -457,6 +479,21 @@ export default function LabTestsClient({ initialTests }: LabTestsClientProps) {
                   <option value="ACTIVE">Active (Available)</option>
                   <option value="INACTIVE">Inactive (Hidden)</option>
                 </select>
+              </div>
+
+              <div className="flex items-center gap-2 py-1">
+                <input
+                  type="checkbox"
+                  id="edit-doctorOrderRequired"
+                  name="doctorOrderRequired"
+                  value="true"
+                  defaultChecked={editingTest.doctor_order_required}
+                  disabled={isPending}
+                  className="w-4 h-4 text-primary bg-input border-input-border rounded focus:ring-primary cursor-pointer"
+                />
+                <label htmlFor="edit-doctorOrderRequired" className="text-sm font-semibold text-heading cursor-pointer select-none">
+                  Doctor order required to run
+                </label>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">

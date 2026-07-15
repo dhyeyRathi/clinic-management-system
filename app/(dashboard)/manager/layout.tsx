@@ -38,7 +38,7 @@ export default async function ManagerLayout({
   }
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-background overflow-hidden" suppressHydrationWarning>
       <ManagerSidebar
         userName={profile?.name ?? "Manager"}
         userEmail={user.email}

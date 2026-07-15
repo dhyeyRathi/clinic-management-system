@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronUp,
   Printer,
+  FileText,
   CreditCard,
   CheckCircle2,
   XCircle,
@@ -19,11 +20,18 @@ import {
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { receptionistCreateInvoiceAction } from "@/app/actions/receptionist";
+import { updateInvoiceStatusAction } from "@/app/actions/finance";
 
 interface Client {
   id: string;
   client_code: string;
   name: string;
+}
+
+interface Doctor {
+  id: string;
+  name: string;
+  specialization: string;
 }
 
 interface InvoiceItem {
@@ -45,6 +53,7 @@ interface Invoice {
   payment_status: string;
   payment_method: string | null;
   created_at: string;
+  pdf_url?: string | null;
   client: {
     id: string;
     client_code: string;
@@ -56,11 +65,14 @@ interface Invoice {
 interface ReceptionistInvoicesClientProps {
   invoices: Invoice[];
   clients: Client[];
+  doctors: Doctor[];
 }
 
 const statusColors: Record<string, string> = {
   PAID: "bg-success/10 text-success border-success/20",
   UNPAID: "bg-danger/10 text-danger border-danger/20",
+  NOT_STARTED: "bg-danger/10 text-danger border-danger/20",
+  PENDING_APPROVAL: "bg-warning/10 text-warning border-warning/20",
   PARTIAL: "bg-warning/10 text-warning border-warning/20",
   REFUNDED: "bg-muted/15 text-muted border-muted/30",
 };
@@ -68,6 +80,8 @@ const statusColors: Record<string, string> = {
 const statusIcons: Record<string, any> = {
   PAID: CheckCircle2,
   UNPAID: XCircle,
+  NOT_STARTED: XCircle,
+  PENDING_APPROVAL: Clock,
   PARTIAL: Clock,
   REFUNDED: XCircle,
 };
@@ -75,6 +89,7 @@ const statusIcons: Record<string, any> = {
 export default function ReceptionistInvoicesClient({
   invoices: initialInvoices,
   clients,
+  doctors,
 }: ReceptionistInvoicesClientProps) {
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices);
   const [search, setSearch] = useState("");
@@ -83,7 +98,8 @@ export default function ReceptionistInvoicesClient({
 
   // Form states
   const [selectedClient, setSelectedClient] = useState("");
-  const [paymentStatus, setPaymentStatus] = useState<"PAID" | "UNPAID">("UNPAID");
+  const [selectedDoctor, setSelectedDoctor] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState<"PAID" | "NOT_STARTED">("NOT_STARTED");
   const [paymentMethod, setPaymentMethod] = useState<"CASH" | "CARD" | "ONLINE" | "INSURANCE">("CASH");
   const [discountStr, setDiscountStr] = useState("0");
 
@@ -95,6 +111,18 @@ export default function ReceptionistInvoicesClient({
   const [newItemQty, setNewItemQty] = useState("1");
 
   const [isPending, startTransition] = useTransition();
+
+  const handleCollectPayment = (invoiceId: string, method: "CASH" | "CARD" | "ONLINE" | "INSURANCE") => {
+    startTransition(async () => {
+      const res = await updateInvoiceStatusAction(invoiceId, "PAID", method);
+      if (res.success) {
+        toast.success("Payment collected and approved successfully!");
+        window.location.reload();
+      } else {
+        toast.error(res.error || "Failed to collect payment.");
+      }
+    });
+  };
 
   const toggleExpand = (id: string) => {
     setExpandedInvoiceId(expandedInvoiceId === id ? null : id);
@@ -161,7 +189,8 @@ export default function ReceptionistInvoicesClient({
         total,
         paymentStatus,
         paymentStatus === "PAID" ? paymentMethod : null,
-        items
+        items,
+        selectedDoctor || undefined
       );
 
       if (res.success) {
@@ -169,9 +198,10 @@ export default function ReceptionistInvoicesClient({
         setIsModalOpen(false);
         // Reset forms
         setSelectedClient("");
+        setSelectedDoctor("");
         setItems([]);
         setDiscountStr("0");
-        setPaymentStatus("UNPAID");
+        setPaymentStatus("NOT_STARTED");
         // Reload list
         window.location.reload();
       } else {
@@ -185,7 +215,7 @@ export default function ReceptionistInvoicesClient({
       <Toaster position="top-right" richColors />
 
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border border-border rounded-2xl p-4 shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border border-border rounded-2xl p-4 shadow-sm print:hidden">
         {/* Search */}
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
@@ -223,7 +253,9 @@ export default function ReceptionistInvoicesClient({
             return (
               <div
                 key={invoice.id}
-                className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow transition-shadow"
+                className={`bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow transition-shadow ${
+                  !isExpanded ? "print:hidden" : "print:border-0 print:shadow-none"
+                }`}
               >
                 {/* Header */}
                 <div
@@ -231,7 +263,7 @@ export default function ReceptionistInvoicesClient({
                   className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer hover:bg-hover/20 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 print:hidden">
                       <Receipt className="w-5 h-5" />
                     </div>
                     <div>
@@ -254,12 +286,12 @@ export default function ReceptionistInvoicesClient({
                           statusColors[invoice.payment_status]
                         }`}
                       >
-                        <StatusIcon className="w-3 h-3" />
+                        <StatusIcon className="w-3 h-3 print:hidden" />
                         <span>{invoice.payment_status}</span>
                       </span>
                     </div>
 
-                    <div className="text-muted p-1 hover:bg-hover rounded-lg transition-colors">
+                    <div className="text-muted p-1 hover:bg-hover rounded-lg transition-colors print:hidden">
                       {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                     </div>
                   </div>
@@ -267,18 +299,31 @@ export default function ReceptionistInvoicesClient({
 
                 {/* Expanded items */}
                 {isExpanded && (
-                  <div className="border-t border-border bg-hover/10 p-5 space-y-4 animate-in slide-in-from-top-2 duration-200">
-                    <div className="flex justify-between items-center">
+                  <div className="border-t border-border bg-hover/10 p-5 space-y-4 animate-in slide-in-from-top-2 duration-200 print:border-t-0 print:bg-transparent">
+                    <div className="flex justify-between items-center print:hidden">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-muted">
                         Itemized breakdown
                       </h4>
-                      <button
-                        onClick={() => window.print()}
-                        className="flex items-center gap-1.5 text-xs text-primary hover:text-primary-hover font-semibold transition-colors cursor-pointer"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                        <span>Print Invoice</span>
-                      </button>
+                      <div className="flex items-center gap-3">
+                        {invoice.pdf_url && (
+                          <a
+                            href={invoice.pdf_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 text-xs text-emerald-500 hover:text-emerald-600 font-semibold transition-colors cursor-pointer"
+                          >
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>Download PDF</span>
+                          </a>
+                        )}
+                        <button
+                          onClick={() => window.print()}
+                          className="flex items-center gap-1.5 text-xs text-primary hover:text-primary-hover font-semibold transition-colors cursor-pointer"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Print Invoice</span>
+                        </button>
+                      </div>
                     </div>
 
                     {/* Table */}
@@ -313,14 +358,54 @@ export default function ReceptionistInvoicesClient({
 
                     {/* calculations */}
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-2">
-                      <div className="text-xs text-muted flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-primary" />
-                        <span>
-                          Payment Mode:{" "}
-                          <strong className="text-heading">
-                            {invoice.payment_method || "N/A / Pending"}
-                          </strong>
-                        </span>
+                      <div className="text-xs text-muted flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <CreditCard className="w-4 h-4 text-primary" />
+                          <span>
+                            Payment Mode:{" "}
+                            <strong className="text-heading font-bold">
+                              {invoice.payment_method || "N/A / Pending"}
+                            </strong>
+                          </span>
+                        </div>
+                        {(invoice.payment_status === "UNPAID" || invoice.payment_status === "NOT_STARTED") && (
+                          <div className="flex items-center gap-2 mt-2 print:hidden">
+                            <select
+                              id={`pay-method-${invoice.id}`}
+                              className="px-2 py-1 text-xs rounded bg-input border border-input-border text-foreground cursor-pointer focus:outline-none focus:border-primary"
+                              defaultValue="CASH"
+                            >
+                              <option value="CASH">Cash</option>
+                              <option value="CARD">Card</option>
+                              <option value="ONLINE">Online</option>
+                              <option value="INSURANCE">Insurance</option>
+                            </select>
+                            <button
+                              onClick={() => {
+                                const methodEl = document.getElementById(`pay-method-${invoice.id}`) as HTMLSelectElement;
+                                handleCollectPayment(invoice.id, methodEl?.value as any);
+                              }}
+                              disabled={isPending}
+                              className="px-3 py-1 bg-success hover:bg-success-hover text-white dark:text-background rounded font-semibold text-[11px] active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                            >
+                              Collect Payment
+                            </button>
+                          </div>
+                        )}
+                        
+                        {invoice.payment_status === "PENDING_APPROVAL" && (
+                          <div className="flex items-center gap-2 mt-2 print:hidden">
+                            <button
+                              onClick={() => {
+                                handleCollectPayment(invoice.id, invoice.payment_method as any || "ONLINE");
+                              }}
+                              disabled={isPending}
+                              className="px-3 py-1 bg-success hover:bg-success-hover text-white dark:text-background rounded font-semibold text-[11px] active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                            >
+                              Approve Payment
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       <div className="w-full sm:w-64 space-y-2 text-xs">
@@ -390,6 +475,25 @@ export default function ReceptionistInvoicesClient({
                   {clients.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name} ({c.client_code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Select Doctor */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-2">
+                  Assigned Doctor (Optional)
+                </label>
+                <select
+                  value={selectedDoctor}
+                  onChange={(e) => setSelectedDoctor(e.target.value)}
+                  className="w-full px-4 py-2.5 text-sm rounded-xl bg-input border border-input-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
+                >
+                  <option value="">-- Choose Doctor (if applicable) --</option>
+                  {doctors.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      Dr. {d.name} ({d.specialization})
                     </option>
                   ))}
                 </select>
@@ -504,14 +608,14 @@ export default function ReceptionistInvoicesClient({
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => setPaymentStatus("UNPAID")}
+                        onClick={() => setPaymentStatus("NOT_STARTED")}
                         className={`flex-1 py-2 rounded-xl border text-center font-bold cursor-pointer transition-all ${
-                          paymentStatus === "UNPAID"
+                          paymentStatus === "NOT_STARTED"
                             ? "border-danger bg-danger/5 text-danger"
                             : "border-border hover:bg-hover text-muted"
                         }`}
                       >
-                        Unpaid
+                        Not Started
                       </button>
                       <button
                         type="button"
@@ -544,6 +648,7 @@ export default function ReceptionistInvoicesClient({
                       </select>
                     </div>
                   )}
+
                 </div>
 
                 {/* Financial aggregates */}

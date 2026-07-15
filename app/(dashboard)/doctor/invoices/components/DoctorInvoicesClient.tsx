@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
-import { requestPaymentApprovalAction, payInvoiceDirectlyAction } from "@/app/actions/finance";
+import { useState } from "react";
 import {
   Receipt,
   Search,
@@ -10,7 +8,6 @@ import {
   ChevronUp,
   CreditCard,
   Calendar,
-  DollarSign,
   Printer,
   FileText,
   CheckCircle2,
@@ -39,18 +36,20 @@ interface Invoice {
   payment_method: string | null;
   created_at: string;
   pdf_url?: string | null;
+  client: {
+    client_code: string;
+    name: string;
+  };
   invoice_items: InvoiceItem[];
 }
 
-interface InvoicesClientProps {
-  initialInvoices: Invoice[];
+interface DoctorInvoicesClientProps {
+  invoices: Invoice[];
 }
 
 const statusColors: Record<string, string> = {
   PAID: "bg-success/10 text-success border-success/20",
   UNPAID: "bg-danger/10 text-danger border-danger/20",
-  NOT_STARTED: "bg-danger/10 text-danger border-danger/20",
-  PENDING_APPROVAL: "bg-warning/10 text-warning border-warning/20",
   PARTIAL: "bg-warning/10 text-warning border-warning/20",
   REFUNDED: "bg-muted/15 text-muted border-muted/30",
 };
@@ -58,125 +57,24 @@ const statusColors: Record<string, string> = {
 const statusIcons: Record<string, any> = {
   PAID: CheckCircle2,
   UNPAID: XCircle,
-  NOT_STARTED: XCircle,
-  PENDING_APPROVAL: Clock,
   PARTIAL: Clock,
   REFUNDED: XCircle,
 };
 
-function PaymentAction({ invoiceId, isPending, startTransition }: any) {
-  const [method, setMethod] = useState("ONLINE");
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handlePay = () => {
-    setIsProcessing(true);
-    startTransition(async () => {
-      if (method === "CASH" || method === "INSURANCE") {
-        const res = await requestPaymentApprovalAction(invoiceId, method as any);
-        if (res.success) {
-          toast.success("Payment sent for approval!");
-        } else {
-          toast.error(res.error || "Failed to send for approval.");
-        }
-      } else {
-        const res = await payInvoiceDirectlyAction(invoiceId, method as any);
-        if (res.success) {
-          toast.success("Payment completed successfully!");
-        } else {
-          toast.error(res.error || "Failed to process payment.");
-        }
-      }
-      setIsProcessing(false);
-    });
-  };
-
-  return (
-    <div className="mt-6 p-4 bg-background border border-border rounded-xl">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
-        <div className="text-sm">
-          <strong className="text-heading block mb-1">Make a Payment</strong>
-          <span className="text-muted">Select a method to finalize this invoice.</span>
-        </div>
-        <select
-          value={method}
-          onChange={(e) => setMethod(e.target.value)}
-          className="bg-input border border-input-border text-heading text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20 w-full sm:w-48"
-        >
-          <option value="ONLINE">Net Banking</option>
-          <option value="CARD">Credit/Debit Card</option>
-          <option value="CASH">Cash (In-person)</option>
-          <option value="INSURANCE">Insurance</option>
-        </select>
-      </div>
-
-      {(method === "CARD" || method === "ONLINE") && (
-        <div className="bg-card border border-border rounded-lg p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in duration-200">
-          {method === "CARD" ? (
-            <>
-              <div className="col-span-2">
-                <label className="text-xs font-semibold text-muted block mb-1">Card Number</label>
-                <input type="text" placeholder="0000 0000 0000 0000" className="w-full px-3 py-2 bg-input border border-input-border rounded-lg text-sm" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted block mb-1">Expiry</label>
-                <input type="text" placeholder="MM/YY" className="w-full px-3 py-2 bg-input border border-input-border rounded-lg text-sm" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted block mb-1">CVC</label>
-                <input type="text" placeholder="123" className="w-full px-3 py-2 bg-input border border-input-border rounded-lg text-sm" />
-              </div>
-            </>
-          ) : (
-            <div className="col-span-2">
-              <label className="text-xs font-semibold text-muted block mb-1">Select Bank</label>
-              <select className="w-full px-3 py-2 bg-input border border-input-border rounded-lg text-sm">
-                <option>Chase Bank</option>
-                <option>Bank of America</option>
-                <option>Wells Fargo</option>
-                <option>Citi</option>
-              </select>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="flex justify-end">
-        <button
-          disabled={isPending || isProcessing}
-          onClick={handlePay}
-          className="bg-primary hover:bg-primary-hover text-white text-sm font-semibold px-6 py-2 rounded-lg transition-colors disabled:opacity-50"
-        >
-          {method === "CASH" || method === "INSURANCE" ? "Send for Approval" : "Pay Now"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-export default function InvoicesClient({ initialInvoices: invoices }: InvoicesClientProps) {
+export default function DoctorInvoicesClient({ invoices }: DoctorInvoicesClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [expandedInvoiceId, setExpandedInvoiceId] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-
-  const handleRequestApproval = (invoiceId: string, method: "CASH" | "CARD" | "ONLINE" | "INSURANCE") => {
-    startTransition(async () => {
-      const res = await requestPaymentApprovalAction(invoiceId, method);
-      if (res.success) {
-        toast.success("Payment sent for approval!");
-        // The server action revalidates the path, so Next.js will refresh the data
-      } else {
-        toast.error(res.error || "Failed to send payment for approval.");
-      }
-    });
-  };
 
   const toggleExpand = (id: string) => {
     setExpandedInvoiceId(expandedInvoiceId === id ? null : id);
   };
 
   const filteredInvoices = invoices.filter((invoice) => {
-    const matchesSearch = invoice.invoice_no.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      invoice.invoice_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      invoice.client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      invoice.client.client_code.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "ALL" || invoice.payment_status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -190,7 +88,7 @@ export default function InvoicesClient({ initialInvoices: invoices }: InvoicesCl
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <input
             type="text"
-            placeholder="Search by Invoice No..."
+            placeholder="Search by Patient or Invoice No..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 text-sm rounded-xl bg-input border border-input-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -208,8 +106,6 @@ export default function InvoicesClient({ initialInvoices: invoices }: InvoicesCl
             <option value="ALL">All Invoices</option>
             <option value="PAID">Paid</option>
             <option value="UNPAID">Unpaid</option>
-            <option value="NOT_STARTED">Not Started</option>
-            <option value="PENDING_APPROVAL">Pending Approval</option>
             <option value="PARTIAL">Partial</option>
             <option value="REFUNDED">Refunded</option>
           </select>
@@ -220,8 +116,7 @@ export default function InvoicesClient({ initialInvoices: invoices }: InvoicesCl
       {filteredInvoices.length === 0 ? (
         <div className="bg-card border border-border rounded-2xl p-12 text-center text-muted flex flex-col items-center justify-center gap-3">
           <Receipt className="w-12 h-12 text-muted/40" />
-          <p className="text-sm font-medium">No invoices found.</p>
-          <p className="text-xs">Any billing records from the front desk will appear here.</p>
+          <p className="text-sm font-medium">No billing records found.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -255,6 +150,10 @@ export default function InvoicesClient({ initialInvoices: invoices }: InvoicesCl
                           {new Date(invoice.created_at).toLocaleDateString('en-US', {
                             dateStyle: "medium",
                           })}
+                        </span>
+                        <span>•</span>
+                        <span>
+                          Patient: <strong className="text-heading font-semibold">{invoice.client.name} ({invoice.client.client_code})</strong>
                         </span>
                       </p>
                     </div>
@@ -375,15 +274,6 @@ export default function InvoicesClient({ initialInvoices: invoices }: InvoicesCl
                         </div>
                       </div>
                     </div>
-                    
-                    {/* Payment Action Section for Client */}
-                    {(invoice.payment_status === "UNPAID" || invoice.payment_status === "NOT_STARTED") && (
-                      <PaymentAction 
-                        invoiceId={invoice.id} 
-                        isPending={isPending} 
-                        startTransition={startTransition} 
-                      />
-                    )}
                   </div>
                 )}
               </div>

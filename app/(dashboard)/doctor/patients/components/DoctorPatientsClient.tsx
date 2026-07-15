@@ -194,7 +194,7 @@ export default function DoctorPatientsClient({
                   <p className="text-[10px] uppercase font-bold text-muted/60">Date of Birth</p>
                   <p className="text-heading font-medium">
                     {selectedPatient.date_of_birth
-                      ? new Date(selectedPatient.date_of_birth).toLocaleDateString([], {
+                      ? new Date(selectedPatient.date_of_birth).toLocaleDateString('en-US', {
                           dateStyle: "medium",
                         })
                       : "N/A"}
@@ -262,7 +262,7 @@ export default function DoctorPatientsClient({
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-bold text-heading flex items-center gap-1.5">
                           <Clock className="w-3.5 h-3.5 text-primary" />
-                          {new Date(v.scheduled_at).toLocaleDateString([], { dateStyle: "medium" })}
+                          {new Date(v.scheduled_at).toLocaleDateString('en-US', { dateStyle: "medium" })}
                         </span>
                         <span className="text-[10px] text-muted">Consultant: {v.doctor_name}</span>
                       </div>

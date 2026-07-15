@@ -10,7 +10,7 @@ export interface ActionResponse {
 
 export async function updateInvoiceStatusAction(
   invoiceId: string,
-  paymentStatus: "UNPAID" | "PAID" | "PARTIAL" | "REFUNDED",
+  paymentStatus: "UNPAID" | "PAID" | "PARTIAL" | "REFUNDED" | "NOT_STARTED" | "PENDING_APPROVAL",
   paymentMethod?: "CASH" | "CARD" | "ONLINE" | "INSURANCE"
 ): Promise<ActionResponse> {
   try {
@@ -45,6 +45,90 @@ export async function updateInvoiceStatusAction(
     });
 
     revalidatePath("/manager/finance");
+    revalidatePath("/receptionist/invoices");
+    revalidatePath("/client/invoices");
+    revalidatePath("/doctor/invoices");
+    return { success: true };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || "An unexpected error occurred.",
+    };
+  }
+}
+
+
+export async function requestPaymentApprovalAction(
+  invoiceId: string,
+  paymentMethod: "CASH" | "CARD" | "ONLINE" | "INSURANCE"
+): Promise<ActionResponse> {
+  try {
+    const supabaseClient = await createClient();
+    const { data: userData } = await supabaseClient.auth.getUser();
+    
+    if (!userData.user) throw new Error("Unauthorized");
+    
+    const { data: updated, error } = await supabaseClient
+      .from("invoices")
+      .update({
+        payment_status: "PENDING_APPROVAL",
+        payment_method: paymentMethod,
+      })
+      .eq("id", invoiceId)
+      .select();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    if (!updated || updated.length === 0) {
+      return { success: false, error: "Unauthorized or invoice not found." };
+    }
+
+    revalidatePath("/client/invoices");
+    revalidatePath("/receptionist/invoices");
+    revalidatePath("/manager/finance");
+    
+    return { success: true };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || "An unexpected error occurred.",
+    };
+  }
+}
+
+export async function payInvoiceDirectlyAction(
+  invoiceId: string,
+  paymentMethod: "CASH" | "CARD" | "ONLINE" | "INSURANCE"
+): Promise<ActionResponse> {
+  try {
+    const supabaseClient = await createClient();
+    const { data: userData } = await supabaseClient.auth.getUser();
+    
+    if (!userData.user) throw new Error("Unauthorized");
+    
+    const { data: updated, error } = await supabaseClient
+      .from("invoices")
+      .update({
+        payment_status: "PAID",
+        payment_method: paymentMethod,
+      })
+      .eq("id", invoiceId)
+      .select();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    if (!updated || updated.length === 0) {
+      return { success: false, error: "Unauthorized or invoice not found." };
+    }
+
+    revalidatePath("/client/invoices");
+    revalidatePath("/receptionist/invoices");
+    revalidatePath("/manager/finance");
+    
     return { success: true };
   } catch (error: any) {
     return {

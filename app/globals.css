@@ -106,3 +106,33 @@ html.dark, :root.dark {
 
   --color-overlay: var(--color-overlay);
 }
+
+/* 4. PRINT STYLES */
+@media print {
+  /* Hide sidebars, headers, mobile top bar, hamburger drawer backdrop, theme switchers, no-print elements, etc. */
+  aside,
+  header,
+  nav,
+  .md\:hidden.fixed.top-0,
+  button,
+  .no-print,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Make main container expand to full width and reset padding/offsets */
+  body,
+  main,
+  .print-full-width {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Ensure background and text colors are printed as shown */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

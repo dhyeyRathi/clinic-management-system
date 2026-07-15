@@ -185,18 +185,7 @@ export default async function ManagerPage() {
         </div>
       </div>
 
-      {/* System Notice */}
-      <div className="flex items-start gap-3 bg-warning/5 border border-warning/20 rounded-2xl p-4">
-        <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-medium text-heading">Phase 2 In Progress</p>
-          <p className="text-xs text-muted mt-0.5">
-            Appointment scheduling, calendar overlays, and double-booking
-            validation are currently being built. Staff management and lab
-            catalog are available now.
-          </p>
-        </div>
-      </div>
+
     </div>
   );
 }

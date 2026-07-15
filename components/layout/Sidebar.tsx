@@ -51,8 +51,9 @@ export function Sidebar({
   const navContent = (isMobile = false) => (
     <>
       {/* Logo / Brand */}
-      <div
-        className={`flex items-center gap-3 px-4 py-5 border-b border-border ${
+      <Link
+        href="/"
+        className={`flex items-center gap-3 px-4 py-5 border-b border-border hover:bg-hover/30 transition-colors ${
           !isMobile && collapsed ? "justify-center px-2" : ""
         }`}
       >
@@ -69,13 +70,17 @@ export function Sidebar({
         )}
         {isMobile && (
           <button
-            onClick={() => setMobileOpen(false)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setMobileOpen(false);
+            }}
             className="ml-auto p-1 rounded-lg hover:bg-hover text-muted hover:text-heading transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         )}
-      </div>
+      </Link>
 
       {/* Role Badge */}
       {(isMobile || !collapsed) && (
@@ -175,13 +180,13 @@ export function Sidebar({
   return (
     <>
       {/* ── MOBILE TOP BAR ─────────────────────────────────── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 bg-surface border-b border-border">
-        <div className="flex items-center gap-2">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 bg-surface border-b border-border print:hidden">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-85 transition-opacity">
           <div className="w-7 h-7 rounded-md bg-primary flex items-center justify-center shrink-0">
             <span className="text-white font-bold text-xs">C</span>
           </div>
           <span className="text-heading font-semibold text-sm">ClinicFlow</span>
-        </div>
+        </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <button
