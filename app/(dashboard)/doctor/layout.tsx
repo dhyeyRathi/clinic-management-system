@@ -19,9 +19,13 @@ export default async function DoctorLayout({
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name, role")
+    .select("name, role, must_change_password")
     .eq("id", user.id)
     .single();
+
+  if (profile?.must_change_password) {
+    redirect("/reset-password?first_login=true");
+  }
 
   if (profile?.role !== "DOCTOR") {
     redirect("/login");

@@ -122,19 +122,27 @@ export async function createStaffAction(
       console.error("Failed to write activity log:", logError.message);
     }
 
-    // 4. Send welcome email with temporary password and login link
+    // 4. Send welcome email via Supabase Edge Function using configured SMTP/Resend
     try {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-      await sendStaffWelcomeEmail({
-        to: email,
-        name,
-        role,
-        temporaryPassword: password,
-        loginLink: `${siteUrl}/login`,
+      const { data: fnData, error: fnErr } = await supabase.functions.invoke("send-onboarding-email", {
+        body: {
+          to: email,
+          name,
+          role,
+          temporaryPassword: password,
+          loginLink: `${siteUrl}/login`,
+        },
       });
+
+      if (fnErr) {
+        console.error("Welcome email edge function failed:", fnErr.message);
+      } else {
+        console.log("Welcome email sent via Edge Function successfully:", fnData);
+      }
     } catch (emailErr: any) {
       // Email failure is non-fatal — staff account still created
-      console.error("Welcome email failed:", emailErr.message);
+      console.error("Welcome email failed to invoke:", emailErr.message);
     }
 
     revalidatePath("/manager/staff");

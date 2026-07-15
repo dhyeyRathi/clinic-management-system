@@ -66,6 +66,9 @@ export async function proxy(request: NextRequest) {
 
     // If user is on landing page "/" or an auth page (login/register), redirect to their dashboard
     if (url === "/" || isAuthPage) {
+      if (url.startsWith("/reset-password")) {
+        return NextResponse.next();
+      }
       const dashboardUrl = new URL(userDashboard, request.url);
       return NextResponse.redirect(dashboardUrl);
     }
