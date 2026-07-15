@@ -1,5 +1,6 @@
 import React from "react";
 import ResetPasswordForm from "./components/ResetPasswordForm";
+import InitResetPasswordForm from "./components/InitResetPasswordForm";
 import { HeartPulse } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { createClient } from "@/lib/supabase/server";
@@ -11,7 +12,7 @@ export const metadata = {
 };
 
 interface PageProps {
-  searchParams: Promise<{ flow?: string }>;
+  searchParams: Promise<{ flow?: string; first_login?: string }>;
 }
 
 const ResetPasswordPage = async ({ searchParams }: PageProps) => {
@@ -24,15 +25,17 @@ const ResetPasswordPage = async ({ searchParams }: PageProps) => {
     redirect("/forgot-password");
   }
 
-  const { flow } = await searchParams;
-  if (flow !== "recovery") {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
+  const { flow, first_login } = await searchParams;
 
-    const role = profile?.role || "CLIENT";
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const role = profile?.role || "CLIENT";
+
+  if (flow !== "recovery" && first_login !== "true") {
     const dashboards: Record<string, string> = {
       CLIENT: "/client",
       DOCTOR: "/doctor",
@@ -72,7 +75,11 @@ const ResetPasswordPage = async ({ searchParams }: PageProps) => {
 
       {/* Form Wrapper */}
       <div className="w-full flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-        <ResetPasswordForm />
+        {first_login === "true" ? (
+          <InitResetPasswordForm role={role} />
+        ) : (
+          <ResetPasswordForm />
+        )}
       </div>
     </main>
   );

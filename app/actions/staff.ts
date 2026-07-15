@@ -122,29 +122,16 @@ export async function createStaffAction(
       console.error("Failed to write activity log:", logError.message);
     }
 
-    // 4. Generate a password reset link and send welcome email
+    // 4. Send welcome email with temporary password and login link
     try {
-      const adminSupabase = createAdminClient();
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
-      const { data: linkData, error: linkError } = await adminSupabase.auth.admin.generateLink({
-        type: "recovery",
-        email,
-        options: {
-          redirectTo: `${siteUrl}/reset-password`,
-        },
+      await sendStaffWelcomeEmail({
+        to: email,
+        name,
+        role,
+        temporaryPassword: password,
+        loginLink: `${siteUrl}/login`,
       });
-
-      if (linkError) {
-        console.error("Failed to generate reset link:", linkError.message);
-      } else if (linkData?.properties?.action_link) {
-        await sendStaffWelcomeEmail({
-          to: email,
-          name,
-          role,
-          resetLink: linkData.properties.action_link,
-        });
-      }
     } catch (emailErr: any) {
       // Email failure is non-fatal — staff account still created
       console.error("Welcome email failed:", emailErr.message);

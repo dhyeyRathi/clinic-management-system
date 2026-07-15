@@ -6,19 +6,21 @@ export async function sendStaffWelcomeEmail({
   to,
   name,
   role,
-  resetLink,
+  temporaryPassword,
+  loginLink,
 }: {
   to: string;
   name: string;
   role: string;
-  resetLink: string;
+  temporaryPassword: string;
+  loginLink: string;
 }) {
   const roleLabel = role.replace("_", " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 
   const { error } = await resend.emails.send({
     from: "ClinicFlow <onboarding@resend.dev>",
     to,
-    subject: `Welcome to ClinicFlow — Set Your Password`,
+    subject: `Welcome to ClinicFlow — Your Account Credentials`,
     html: `
       <!DOCTYPE html>
       <html lang="en">
@@ -51,30 +53,29 @@ export async function sendStaffWelcomeEmail({
                     <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#111827;">Welcome, ${name}! 👋</h1>
                     <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.6;">
                       Your <strong style="color:#111827;">${roleLabel}</strong> account has been created on ClinicFlow by your clinic manager. 
-                      To get started, you need to set your own password by clicking the button below.
+                      You can log in to your account using the credentials below:
                     </p>
 
+                    <!-- Credentials Box -->
+                    <div style="background:#f3f4f6;border-radius:12px;padding:18px;margin-bottom:24px;border:1px solid #e5e7eb;">
+                      <p style="margin:0 0 8px;font-size:14px;color:#374151;"><strong>Email:</strong> ${to}</p>
+                      <p style="margin:0;font-size:14px;color:#374151;"><strong>Temporary Password:</strong> <code style="background:#e5e7eb;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:14px;">${temporaryPassword}</code></p>
+                    </div>
+
                     <!-- Alert box -->
-                    <div style="background:#fef9c3;border:1px solid #fcd34d;border-radius:10px;padding:14px 18px;margin-bottom:28px;">
-                      <p style="margin:0;font-size:13px;color:#92400e;">
-                        ⚠️ <strong>This link expires in 24 hours.</strong> Please set your password before it expires.
+                    <div style="background:#efecfd;border:1px solid #c7d2fe;border-radius:10px;padding:14px 18px;margin-bottom:28px;">
+                      <p style="margin:0;font-size:13px;color:#4f46e5;">
+                        🔒 <strong>Security Policy:</strong> You will be forced to change this temporary password immediately upon your first login.
                       </p>
                     </div>
 
                     <!-- CTA Button -->
                     <div style="text-align:center;margin-bottom:28px;">
-                      <a href="${resetLink}" 
+                      <a href="${loginLink}" 
                          style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-weight:700;font-size:15px;padding:14px 36px;border-radius:12px;text-decoration:none;letter-spacing:0.2px;">
-                        Set My Password →
+                        Log In to ClinicFlow →
                       </a>
                     </div>
-
-                    <p style="margin:0 0 8px;color:#9ca3af;font-size:12px;text-align:center;">
-                      Or copy and paste this URL into your browser:
-                    </p>
-                    <p style="margin:0;font-size:11px;color:#6366f1;text-align:center;word-break:break-all;">
-                      ${resetLink}
-                    </p>
                   </td>
                 </tr>
 
