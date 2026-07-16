@@ -48,7 +48,11 @@ export default async function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-body flex flex-col font-sans selection:bg-primary selection:text-white">
+    <div className="min-h-screen bg-background text-body flex flex-col font-sans selection:bg-primary selection:text-white relative overflow-hidden">
+      {/* Ambient background glow orbs */}
+      <div className="glow-bg glow-1"></div>
+      <div className="glow-bg glow-2"></div>
+
       {/* ── HEADER ────────────────────────────────────────── */}
       <LandingHeader userDashboard={userDashboard} userName={userName} currentPath="/about" />
 
@@ -184,8 +188,8 @@ export default async function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 rounded bg-primary flex items-center justify-center shrink-0 font-extrabold text-white text-base">
-                  C
+                <div className="w-8 h-8 rounded flex items-center justify-center shrink-0 overflow-hidden">
+                  <img src="/favicon.png" alt="ClinicFlow Logo" className="w-full h-full object-contain" />
                 </div>
                 <span className="font-bold text-xl text-heading tracking-tight">ClinicFlow</span>
               </div>

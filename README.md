@@ -39,6 +39,7 @@ clinic-management-system/
 │   ├── about/                  # Public about page
 │   ├── api/                    # Serverless REST endpoints for users, clients, and doctors
 │   ├── auth/                   # Redirect handler for confirmation links
+│   ├── doctors/[id]/           # Public doctor profile details & biography views
 │   ├── icon.png                # Dynamic Next.js favicon asset
 │   ├── layout.tsx              # Root HTML wrapper with theme providers and global alerts
 │   ├── page.tsx                # Public homepage with diagnostics catalog and services

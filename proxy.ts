@@ -12,6 +12,7 @@ const PUBLIC_PREFIXES = [
   "/api/auth",
   "/images",
   "/about",
+  "/doctors",
   "/sitemap.xml",
   "/robots.txt",
   "/llms.txt",

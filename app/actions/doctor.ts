@@ -282,7 +282,6 @@ export async function issueClinicalReportAction(formData: FormData): Promise<Act
   }
 }
 
-// 3. Update Doctor Roster Profile & availability JSON
 export async function updateDoctorProfileAction(formData: FormData): Promise<ActionResponse> {
   const name = formData.get("name") as string;
   const phone = formData.get("phone") as string;
@@ -290,6 +289,7 @@ export async function updateDoctorProfileAction(formData: FormData): Promise<Act
   const qualifications = formData.get("qualifications") as string;
   const consultationFeeStr = formData.get("consultationFee") as string;
   const availabilityJsonStr = formData.get("availability") as string;
+  const biography = formData.get("biography") as string;
   const avatarFile = formData.get("avatar") as File | null;
 
   if (!name || !specialization || !qualifications || !consultationFeeStr) {
@@ -335,7 +335,7 @@ export async function updateDoctorProfileAction(formData: FormData): Promise<Act
 
     const { data: oldDocProfile } = await supabase
       .from("doctor_profiles")
-      .select("specialization, qualifications, consultation_fee, availability")
+      .select("id, specialization, qualifications, consultation_fee, availability")
       .eq("user_id", user.id)
       .single();
 
@@ -382,13 +382,30 @@ export async function updateDoctorProfileAction(formData: FormData): Promise<Act
       return { success: false, error: docError.message };
     }
 
+    // Upsert story in doctor_details table
+    if (biography !== null && biography !== undefined) {
+      const { error: storyError } = await supabase
+        .from("doctor_details")
+        .upsert({
+          doctor_profile_id: oldDocProfile.id,
+          story: biography,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: "doctor_profile_id"
+        });
+
+      if (storyError) {
+        return { success: false, error: storyError.message };
+      }
+    }
+
     // Log action
     await supabase.rpc("log_activity", {
       p_action: "UPDATE_DOCTOR_PROFILE",
       p_entity_type: "doctor",
       p_entity_id: user.id,
       p_before_data: { ...oldProfile, ...oldDocProfile },
-      p_after_data: { name, phone, specialization, qualifications, consultationFee: fee, availability: availabilityArray, avatar_url: avatarUrl || oldProfile?.avatar_url },
+      p_after_data: { name, phone, specialization, qualifications, consultationFee: fee, availability: availabilityArray, avatar_url: avatarUrl || oldProfile?.avatar_url, biography },
     });
 
     revalidatePath("/doctor/profile");

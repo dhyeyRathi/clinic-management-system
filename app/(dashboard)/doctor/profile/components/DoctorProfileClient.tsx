@@ -37,6 +37,7 @@ interface DoctorProfileClientProps {
       qualifications: string;
       consultation_fee: any;
       availability: AvailabilitySlot[];
+      story?: string;
     } | null;
   };
 }
@@ -59,6 +60,7 @@ export default function DoctorProfileClient({ profile }: DoctorProfileClientProp
   const [specialization, setSpecialization] = useState(docData?.specialization || "");
   const [qualifications, setQualifications] = useState(docData?.qualifications || "");
   const [consultationFee, setConsultationFee] = useState(docData?.consultation_fee ? String(docData.consultation_fee) : "0");
+  const [story, setStory] = useState(docData?.story || "");
 
   // Availability template list
   const [availability, setAvailability] = useState<AvailabilitySlot[]>(docData?.availability || []);
@@ -81,6 +83,7 @@ export default function DoctorProfileClient({ profile }: DoctorProfileClientProp
     specialization !== (docData?.specialization || "") ||
     qualifications !== (docData?.qualifications || "") ||
     consultationFee !== (docData?.consultation_fee ? String(docData.consultation_fee) : "0") ||
+    story !== (docData?.story || "") ||
     JSON.stringify(availability) !== originalAvailabilityJson ||
     avatarFile !== null;
 
@@ -133,6 +136,7 @@ export default function DoctorProfileClient({ profile }: DoctorProfileClientProp
       formData.append("qualifications", qualifications);
       formData.append("consultationFee", consultationFee);
       formData.append("availability", JSON.stringify(availability));
+      formData.append("biography", story);
       if (avatarFile) {
         formData.append("avatar", avatarFile);
       }
@@ -291,6 +295,21 @@ export default function DoctorProfileClient({ profile }: DoctorProfileClientProp
                     value={consultationFee}
                     onChange={(e) => setConsultationFee(e.target.value)}
                     className="w-full pl-9 pr-4 py-2.5 text-sm rounded-xl bg-input border border-input-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-muted mb-2">
+                  My Story / Biography
+                </label>
+                <div className="relative">
+                  <textarea
+                    rows={4}
+                    value={story}
+                    onChange={(e) => setStory(e.target.value)}
+                    placeholder="Share your experience, professional philosophy, medical background, and message to patients..."
+                    className="w-full px-4 py-2.5 text-sm rounded-xl bg-input border border-input-border text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-y"
                   />
                 </div>
               </div>

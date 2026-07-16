@@ -33,7 +33,10 @@ export default async function DoctorProfilePage() {
         specialization,
         qualifications,
         consultation_fee,
-        availability
+        availability,
+        doctor_details (
+          story
+        )
       )
     `)
     .eq("id", user.id)
@@ -47,15 +50,23 @@ export default async function DoctorProfilePage() {
     );
   }
 
+  const rawDocProfile = Array.isArray(profile.doctor_profiles)
+    ? profile.doctor_profiles[0]
+    : profile.doctor_profiles;
+
+  const rawDetails = rawDocProfile?.doctor_details;
+  const docDetails = Array.isArray(rawDetails) ? rawDetails[0] : rawDetails;
+
   const formattedProfile = {
     id: profile.id,
     name: profile.name,
     phone: profile.phone,
     email: profile.email,
     avatar_url: profile.avatar_url,
-    doctor_profiles: Array.isArray(profile.doctor_profiles)
-      ? profile.doctor_profiles[0]
-      : profile.doctor_profiles,
+    doctor_profiles: rawDocProfile ? {
+      ...rawDocProfile,
+      story: docDetails?.story || "",
+    } : null,
   };
 
   return (
