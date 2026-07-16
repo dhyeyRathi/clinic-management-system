@@ -103,9 +103,6 @@ export default async function Home() {
             <Link href="/" className="text-sm font-semibold text-primary hover:text-primary transition-colors">
               Home
             </Link>
-            <Link href="/about" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
-              About Us
-            </Link>
             <Link href="#services" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
               Our Services
             </Link>
@@ -114,6 +111,9 @@ export default async function Home() {
             </Link>
             <Link href="#diagnostics" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
               Diagnostics
+            </Link>
+            <Link href="/about" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
+              About Us
             </Link>
           </nav>
 

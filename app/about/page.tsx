@@ -9,8 +9,7 @@ import {
   CheckCircle2,
   Award,
   Users,
-  Building,
-  Target
+  Building
 } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -73,9 +72,6 @@ export default async function AboutPage() {
             <Link href="/" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
               Home
             </Link>
-            <Link href="/about" className="text-sm font-semibold text-primary hover:text-primary transition-colors">
-              About Us
-            </Link>
             <Link href="/#services" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
               Our Services
             </Link>
@@ -84,6 +80,9 @@ export default async function AboutPage() {
             </Link>
             <Link href="/#diagnostics" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
               Diagnostics
+            </Link>
+            <Link href="/about" className="text-sm font-semibold text-primary hover:text-primary transition-colors">
+              About Us
             </Link>
           </nav>
 
@@ -120,11 +119,6 @@ export default async function AboutPage() {
         {/* ── HERO SECTION ───────────────────────────────────── */}
         <section className="relative px-4 sm:px-6 lg:px-8 py-20 md:py-28 max-w-7xl mx-auto flex flex-col items-center text-center overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent -z-10" />
-          
-          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-bold px-3.5 py-1.5 rounded-full mb-6 uppercase tracking-wider">
-            <Target className="w-3.5 h-3.5" />
-            Our Vision & Mission
-          </div>
           
           <h1 id="about-heading" className="text-4xl md:text-5xl font-extrabold text-heading tracking-tight max-w-3xl leading-tight mb-6">
             Empowering Healthier Communities Through <span className="text-primary bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">Excellence & Care</span>
