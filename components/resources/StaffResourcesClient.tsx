@@ -15,7 +15,7 @@ import {
   XCircle,
   ClipboardList,
 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { requestResourceAction } from "@/app/actions/resources";
 
 interface Resource {
@@ -116,7 +116,7 @@ export default function StaffResourcesClient({
 
   return (
     <div className="space-y-4">
-      <Toaster position="top-right" richColors />
+      
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-border pb-px mb-4">

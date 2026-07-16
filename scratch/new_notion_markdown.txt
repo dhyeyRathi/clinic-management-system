@@ -1,0 +1,365 @@
+# **🏢 1. Project Overview**
+The **Clinic Management System** is a secure, role-based, multi-user healthcare workflow platform. It digitizes operations by centralizing client scheduling, doctor consultations, receptionist queue management, medical histories, prescription handling, laboratory test bookings, lab result distribution, and manager dashboards. The platform ensures strict data privacy and isolation using a robust Role-Based Access Control (RBAC) model.
+---
+# **🛑 2. Problem Statement**
+Traditional clinic operations rely heavily on manual procedures, which suffer from major operational bottlenecks:
+- **Manual Scheduling Errors:** Double-bookings, slot conflicts, and inefficient doctor availability tracking.
+- **Disconnected Medical Records:** Scattered paper histories and lost diagnostic reports make tracking client history difficult.
+- **Prescription Loss:** Verbal or handwritten prescriptions are easily lost, raising compliance and safety risks.
+- **Manual Lab Booking Inefficiencies:** Delayed test requests, lost physical result sheets, and poor tracking of scheduled diagnostics.
+- **Data Security & Privacy:** Administrative staff having access to sensitive clinical notes, or clients viewing other clients' records.
+- **Lack of Audits:** Inability to track system overrides, financial logs, or role-based account activities.
+---
+# **👥 3. Target Users**
+- **👤 Clients:** Individuals seeking to book clinic sessions, request lab tests, download prescriptions, view history, and receive notifications.
+- **🩺 Doctors:** Healthcare practitioners managing assigned schedules, consults, clinical notes, recommending lab tests, and issuing digital prescriptions.
+- **🛎️ Receptionists:** Front-desk operators managing schedules, queue check-ins, client registration, and appointment confirmation.
+- **🥼 Lab Managers:** Laboratory supervisors responsible for confirming lab bookings, managing lab tests availability, and uploading results.
+- **💼 Managers:** Administrators overlooking staff configurations, clinic analytics, resource usage (rooms/lab equipment), and audit logs.
+---
+# **📊 4. Research**
+During the portfolio planning stage, three distinct project concepts were evaluated for technical viability, business value, and portfolio impact:
+- *Enterprise Asset and Resource Management System*
+- ***Clinic Appointment and Client Management System***
+- *Internship Supervision Task Management System*
+The comparison of features indicated that the Clinic Management System presented the highest implementation difficulty, but also the greatest real-world utility and portfolio impact. It demands a sophisticated RBAC architecture, strict field-level data privacy, and a real-time workflow coordination engine, making it the most suitable candidate for full-stack software development.
+---
+# **🏥 5. Selected Project**
+**Selected Concept: Clinic Appointment and Client Management System**
+- **Demonstrates enterprise-grade RBAC and compliance-ready data boundaries.**
+- Features high-value CRUD complexity (Prescriptions, Appointments, Lab Bookings, and Visit Histories interacting in a transactional manner).
+- Showcases real-world front-desk workflows (waiting queues, check-ins, lab uploads, reassignments) and high-impact manager analytics.
+---
+# **⚙️ 6. Feature List**
+- **🔐 Authentication & Access:** Secure Supabase Auth, session handling, and page route/API guards.
+- **📈 Dashboard & Analytics:** Customized views containing stats, recent activities, and workload charts.
+- **💾 CRUD Operations:** Comprehensive data management for Clients, Doctors, Appointments, Lab Tests, Lab Bookings, Prescriptions, Resources, and Billings.
+- **🔍 Search & Filter:** Search clients by code/name; filter appointments and lab bookings by status, department, and doctor; paginate results.
+- **☁️ File Uploads:** Scanned clinical reports, lab results, avatar images, and prescription PDFs securely handled via Cloudinary.
+- **📝 Logs & Audit Trail:** Login history logs, appointment status trackers, and critical override activity logs.
+- **🔔 Notifications:** Inside-app alert centers for bookings, cancellations, check-in updates, lab result notifications, and prescription availability.
+- **💎 Interface Polish:** Dynamic loading skeletons, clear empty states with call-to-actions, and error boundaries.
+---
+# **👥 7. User Roles**
+## **👤 7.1 Client**
+**Purpose:** Request appointments, book lab tests, track personal medical timeline, and download prescriptions.
+- **Allowed Actions:** Register/Login, update self-profile, book appointments, view own records (prescriptions, history, invoices, lab reports), book lab tests (status set to pending), cancel bookings.
+- **Restricted Actions:** Cannot view other clients, create/edit prescriptions, edit clinical logs, manage lab test service catalogs, or view manager finance dashboards.
+## **🩺 7.2 Doctor**
+**Purpose:** Manage schedules, record consultation notes, recommend lab tests, and author prescriptions.
+- **Allowed Actions:** View assigned appointments, read assigned client histories, record consultation outcomes and notes, recommend lab tests, issue prescriptions, upload scanned reports.
+- **Restricted Actions:** Cannot see global clinic revenue reports, modify staff accounts, approve or reschedule lab bookings, or view clients outside of assigned consultations.
+## **🛎️ 7.3 Receptionist**
+**Purpose:** Coordinate front-desk schedule flow and queue operations.
+- **Allowed Actions:** View doctor calendars, register new clients, confirm/reject/reschedule appointments, manage check-in queues, assign clients to doctors.
+- **Restricted Actions:** Cannot read clinical notes, view or download client prescriptions, manage lab bookings, access diagnostic medical files, or change system roles.
+## **🥼 7.4 Lab Manager**
+**Purpose:** Supervise laboratory bookings, check-in clients for diagnostic tests, and upload results.
+- **Allowed Actions:** View laboratory schedule calendars, confirm/reject/reschedule lab bookings, manage test-specific availability status in the catalog, upload result PDFs/images to Cloudinary and link them to lab bookings.
+- **Restricted Actions:** Cannot read clinical notes, view or download client prescriptions, schedule doctor appointments, view global clinic revenue, or modify user accounts.
+## **💼 7.5 Manager**
+**Purpose:** Oversee staff, resources, lab catalogs, finances, and clinic analytics.
+- **Allowed Actions:** Manage staff accounts (CRUD), manage rooms, lab equipment, and service catalogs (CRUD for Lab Tests), override schedule conflicts, view finance reports, and audit system activity logs.
+- **Restricted Actions:** Cannot edit client clinical notes or alter medical history records.
+## **🛡️ 7.6 Role Creation Pathways & Security Constraints**
+To prevent privilege escalation and enforce strict role boundaries, user creation is governed by database-level triggers and RLS guards:
+- **Anonymous Public Signups:** Restricted exclusively to the `CLIENT` role. Any attempt to register other roles during public signup will abort the transaction.
+- **Staff Registrations:** Only an authenticated user with the `MANAGER` role can create user accounts. The manager is strictly limited to creating `DOCTOR`, `RECEPTIONIST`, and `LAB_MANAGER` accounts. The manager cannot create `CLIENT` or `MANAGER` accounts.
+- **Manager Accounts:** Created exclusively through direct database querying or seeding. They cannot be created via the frontend application.
+---
+# **🔄 8. User Flow**
+## **8.1 Appointment Booking Flow**
+1. Client logs in, searches for doctors by specialization, and requests a time slot.
+2. Receptionist receives the booking in the incoming queue, checks doctor availability, and confirms the request.
+3. System triggers an in-app booking confirmation notification to the client.
+4. The slot is locked, updating the doctor's daily schedule calendar.
+## **8.2 Consultation & Prescription Flow**
+1. Client arrives at the clinic; Receptionist marks the client as Checked In.
+2. The queue dashboard updates, moving the client to the doctor's active waiting queue.
+3. Doctor opens the appointment from their dashboard, reviews the client's medical timeline, and enters clinical notes.
+4. Doctor enters prescription details (dosage/medications) and optionally recommends a list of lab tests.
+5. Doctor marks the session Completed and requests a follow-up date.
+6. Client logs in to download the prescription PDF.
+## **8.3 Lab Test Booking & Results Flow**
+1. Client views recommended lab tests from their consultation timeline.
+2. Client schedules a lab booking, selecting a test type and slot.
+3. Lab Manager receives the booking, checks resource slots, and confirms the lab appointment.
+4. Client arrives for the test; Lab Manager marks the client as Checked In.
+5. Lab Manager uploads the completed result PDF to Cloudinary and links it to the lab booking.
+6. System marks the booking Completed and triggers an alert notifying both the Client and recommending Doctor that results are ready.
+## **8.4 Manager Auditing Flow**
+1. Manager logs in and views the consolidated operations panel.
+2. Manager checks financial collections (invoiced vs. paid amounts) and doctor/lab utilization.
+3. Manager opens the system audit panel to review sensitive events, such as appointment overrides or staff role changes.
+---
+# **🗺️ 9. Sitemap**
+- Landing Page (`/`)
+- Auth gateway (`/login`)
+- Client sign-up (`/register`)
+- Password resets (`/forgot-password` and `/reset-password`)
+- Unified dashboard redirector (`/client`, `/doctor`, `/manager`, `/receptionist`, `/lab-manager`)
+- Shared Profile Settings (`/profile`)
+- **👤 Client Pages:**
+  - Appointments (`/client/appointments`)
+  - Invoices (`/client/invoices`)
+  - Lab Tests Catalog (`/client/lab-tests`)
+  - Medical Reports (`/client/reports`)
+- **🩺 Doctor Pages:**
+  - Consultation Overview (`/doctor`)
+  - Appointments Calendar (`/doctor/appointments`)
+  - Patient Records (`/doctor/patients`)
+  - Reports Publisher (`/doctor/reports`)
+  - Profile & Availability Planner (`/doctor/profile`)
+- **🛎️ Receptionist Pages:**
+  - Desk Overview (`/receptionist`)
+  - Appointments Board (`/receptionist/appointments`)
+  - Clients Directory (`/receptionist/clients`)
+  - Billing & Invoices (`/receptionist/invoices`)
+- **🥼 Lab Manager Pages:**
+  - Lab Overview (`/lab-manager`)
+  - Lab Tests Availability Catalog (`/lab-manager/tests`)
+  - Equipment Inventory (`/lab-manager/resources`)
+  - Upload Reports Portal (`/lab-manager/reports`)
+- **💼 Manager Pages:**
+  - Overview Dashboard (`/manager`)
+  - Staff Configuration (`/manager/staff`)
+  - Lab Tests Service Catalog (`/manager/lab-tests`)
+  - Resources & Equipment Inventory (`/manager/resources`)
+  - Billing & Collections Overview (`/manager/finance`)
+  - Audit Activity Logs (`/manager/logs`)
+  - Clinic Analytics (`/manager/analytics`)
+---
+# **💾 10. Database Design**
+## **Table Schema: User Profiles**
+- `id` (UUID, PK, references auth.users)
+- `name` (String)
+- `phone` (String)
+- `role` (Enum: CLIENT, DOCTOR, RECEPTIONIST, LAB_MANAGER, MANAGER)
+- `status` (Enum: ACTIVE, INACTIVE, SUSPENDED)
+- `avatar_url` (String)
+- `created_at` (Timestamp)
+- `updated_at` (Timestamp)
+
+## **Table Schema: ClientProfile**
+- `id` (UUID, PK)
+- `user_id` (UUID, FK profiles.id)
+- `client_code` (String, Unique MRN format: PAT000001)
+- `date_of_birth` (Date)
+- `gender` (String)
+- `address` (Text)
+- `emergency_contact` (String)
+- `medical_notes_summary` (Text)
+
+## **Table Schema: DoctorProfile**
+- `id` (UUID, PK)
+- `user_id` (UUID, FK profiles.id)
+- `doctor_code` (String, Unique MRN format: DOC000001)
+- `specialization` (String)
+- `qualifications` (String)
+- `availability` (JSON weekly slots schedule)
+- `consultation_fee` (Decimal)
+
+## **Table Schema: Appointment**
+- `id` (UUID, PK)
+- `client_id` (UUID, FK client_profiles.id)
+- `doctor_id` (UUID, FK doctor_profiles.id)
+- `scheduled_at` (Timestamp)
+- `status` (Enum: PENDING, CONFIRMED, REJECTED, CHECKED_IN, COMPLETED, CANCELLED, NO_SHOW)
+- `reason` (Text)
+- `mode` (Enum: IN_PERSON, VIRTUAL)
+- `created_by` (UUID, FK profiles.id)
+- `confirmed_by` (UUID, FK profiles.id)
+- `notes` (Text)
+- `checked_in_at` (Timestamp)
+- `completed_at` (Timestamp)
+
+## **Table Schema: LabTestTypes**
+- `id` (UUID, PK)
+- `name` (String, Unique)
+- `description` (Text)
+- `price` (Decimal)
+- `status` (Enum: ACTIVE, INACTIVE)
+- `doctor_order_required` (Boolean, default FALSE)
+
+## **Table Schema: VisitHistory**
+- `id` (UUID, PK)
+- `client_id` (UUID, FK client_profiles.id)
+- `doctor_id` (UUID, FK doctor_profiles.id)
+- `appointment_id` (UUID, FK appointments.id)
+- `diagnosis` (Text)
+- `treatment_summary` (Text)
+- `follow_up_date` (Date)
+
+## **Table Schema: Prescription**
+- `id` (UUID, PK)
+- `client_id` (UUID, FK client_profiles.id)
+- `doctor_id` (UUID, FK doctor_profiles.id)
+- `appointment_id` (UUID, FK appointments.id)
+- `title` (String)
+- `medicine_list` (JSON data array)
+- `instructions` (Text)
+- `file_url` (String, Cloudinary)
+
+## **Table Schema: Reports**
+- `id` (UUID, PK)
+- `client_id` (UUID, FK client_profiles.id)
+- `uploaded_by` (UUID, FK profiles.id)
+- `file_name` (String)
+- `file_url` (String, Cloudinary)
+- `file_type` (String)
+- `category` (Enum: LAB_RESULT, CLINICAL_ATTACHMENT, INSURANCE_DOCUMENT)
+- `appointment_id` (UUID, FK appointments.id)
+
+## **Table Schema: StaffResource**
+- `id` (UUID, PK)
+- `resource_code` (String, Unique format: RES-0001)
+- `name` (String)
+- `type` (Enum: ROOM, EQUIPMENT, STAFF)
+- `location` (String)
+- `quantity` (Integer)
+- `available_quantity` (Integer)
+- `purchase_date` (Date)
+- `purchase_cost` (Decimal)
+- `manufacturer` (String)
+- `serial_number` (String)
+- `warranty_until` (Date)
+- `image_url` (String, Cloudinary)
+- `status` (Enum: ACTIVE, MAINTENANCE, INACTIVE)
+
+## **Table Schema: ResourceRequests**
+- `id` (UUID, PK)
+- `resource_id` (UUID, FK staff_resources.id)
+- `requested_by` (UUID, FK profiles.id)
+- `quantity` (Integer)
+- `notes` (Text)
+- `status` (Enum: PENDING, APPROVED, REJECTED)
+- `manager_notes` (Text)
+
+## **Table Schema: Invoice**
+- `id` (UUID, PK)
+- `invoice_no` (String, Unique INV-XXXXXXXX)
+- `client_id` (UUID, FK client_profiles.id)
+- `doctor_id` (UUID, FK doctor_profiles.id)
+- `subtotal` (Decimal)
+- `tax` (Decimal)
+- `discount` (Decimal)
+- `total` (Decimal)
+- `payment_status` (Enum: NOT_STARTED, PENDING_APPROVAL, UNPAID, PAID, PARTIAL, REFUNDED)
+- `payment_method` (Enum: CASH, CARD, ONLINE, INSURANCE)
+- `file_url` (String, Cloudinary)
+- `created_by` (UUID, FK profiles.id)
+
+## **Table Schema: InvoiceItem**
+- `id` (UUID, PK)
+- `invoice_id` (UUID, FK invoices.id ON DELETE CASCADE)
+- `item_type` (Enum: CONSULTATION, LAB_TEST, MEDICINE, OTHER)
+- `reference_id` (UUID)
+- `description` (String)
+- `unit_price` (Decimal)
+- `quantity` (Integer)
+- `total_price` (Decimal)
+
+## **Table Schema: ActivityLog**
+- `id` (UUID, PK)
+- `actor_user_id` (UUID, FK profiles.id)
+- `action` (String)
+- `entity_type` (String)
+- `entity_id` (UUID)
+- `before_data` (JSON)
+- `after_data` (JSON)
+- `timestamp` (Timestamp)
+---
+# **🔗 11. Entity Relationships**
+- **User to Profiles:** One-to-One relationship between User and ClientProfile or DoctorProfile.
+- **Client/Doctor to Appointment:** One-to-Many relationship where profiles contain multiple Appointments.
+- **Invoice & Invoice Items:** One-to-Many relationship between Invoice and InvoiceItem. The InvoiceItem references transactional records (appointments or lab_test_types) using polymorphic referenceId bindings.
+- **Appointment to Clinical Records:** One-to-One relationship between Appointment and VisitHistory, Prescription, or Invoice.
+- **Client to Documents:** One-to-Many relationship between ClientProfile and Reports or Prescription (stored in Cloudinary).
+- **Actor to ActivityLogs:** One-to-Many relationship where a User acts as the author of multiple ActivityLogs.
+---
+# **💻 12. Technology Stack**
+Next.js (App Router) + TailwindCSS + Supabase + Cloudinary + Shadcn/ui + Framer Motion + Lucide React + Recharts + jsPDF
+---
+# **📑 13. Dependencies**
+- **Core:** next, react, react-dom, @supabase/supabase-js, cloudinary, jspdf
+- **UI components:** lucide-react, framer-motion, class-variance-authority, clsx, tailwind-merge, radix-ui primitives
+- **Forms & Verification:** zod, react-hook-form, @hookform/resolvers
+- **Charts:** recharts
+---
+# **🔑 14. Authentication Approach**
+- **Supabase Auth:** Email/password logins managed securely with cookies.
+- **Session Middleware:** Next.js Server-Side Middleware reads cookies to enforce page protection layouts.
+- **User Metadata Claims:** Session JWT encodes user roles to dynamically route dashboards.
+- **Database RLS Integration:** Supabase Row-Level Security checks verify authentications directly inside PostgreSQL query processes.
+---
+# **🛡️ 15. Validation Strategy**
+- **Client Schema Validation:** Forms utilize Zod schemas with React Hook Form to reject illegal inputs before submission.
+- **API Schema Verification:** Serverless Next.js API endpoints run payload validations via Zod schemas.
+- **Database Constraints:** Hard constraint rules (e.g. check constraints, unique fields, primary keys) prevent corrupt records.
+---
+# **⚠️ 16. Error Handling Strategy**
+- **API Responses:** Standardized JSON payload errors containing visual debug values.
+- **Toast Notifications:** Client-side API catch-blocks emit toast notifications immediately.
+- **React Boundaries:** Complex scheduling and board screens run inside localized Error Boundary components.
+---
+# **🔒 17. Security Considerations**
+- **PostgreSQL Row-Level Security (RLS):** Policies secure table-level read/writes. Example:
+```sql
+CREATE POLICY client_own_history ON VisitHistory FOR SELECT USING (auth.uid() = (SELECT userId FROM ClientProfile WHERE ClientProfile.id = clientId));
+```
+- **Cloudinary Short-Lived Upload Signatures:** Backend API generates cryptographic hashes so that direct client-side uploads are signed and restricted.
+- **XSS Protection:** Next.js framework renders code safely, preventing dangerous HTML injection.
+---
+# **📱 18. Responsive Strategy**
+- **Fluid Layouts:** Tailwind grids and flex layers adapt panels cleanly for mobile screens.
+- **Collapsible Sidenav:** Desktop side navigations fold down to footer menus or side overlays on mobile viewports.
+---
+# **♿ 19. Accessibility Considerations**
+- **Accessible Radix Components:** Shadcn dialogues, dropdowns, and buttons support keyboard focus overlays.
+- **WCAG Contrast compliance:** Foreground and background color selections satisfy 4.5:1 text readability rules.
+---
+# **🌐 20. SEO Plan**
+- **Dynamic Metadata APIs:** Titles and page summaries are loaded per sitemap section dynamically.
+- **Semantic Tag wrappers:** Structuring layouts using header, footer, nav, and main semantic tags.
+---
+# **🚀 21. Development Roadmap**
+- **Phase 0 - Planning & Scope:** Spec freezes, role tables, sitemaps, DB definitions.
+- **Phase 1 - Foundation Setup:** Initialize Next.js, Shadcn/ui setup, Supabase Client integration, middleware auth.
+- **Phase 2 - Advanced Portals & Cloudinary:** Staff creations, invoices, Cloudinary uploads, doctor, receptionist, and lab manager dashboards, and universal profile configurations.
+---
+# **⌛ 22. Timeline**
+- Setup & Layouts (Phases 0-1): 8 Days
+- Core Workflows, Documents & Lab (Phase 2): 35 Days
+**Total Project Build Duration: 43 Days**
+---
+# **⚠️ 23. Risks and Solutions**
+- **Risk: Unauthorized Access to Client Records**
+  Solution: Activate Supabase Row-Level Security (RLS) on all client tables and enforce authentication policies using auth.uid() matching. Lab reports are isolated from administrative files.
+- **Risk: Appointment & Lab Slot Overlapping/Double Booking**
+  Solution: Execute database-level lock checks on PostgreSQL triggers to prevent duplicate slots during transactional confirmations.
+- **Risk: Cloudinary Asset Upload Security Vulnerabilities**
+  Solution: Direct client uploads to Cloudinary are forbidden. Client must retrieve a cryptographically signed signature from our secure backend API route first.
+---
+# **🧪 24. Testing Checklist**
+- [ ] Authentication: Verify JWT issuance, cookie scopes, and session refresh logic.
+- [ ] RBAC guards: Confirm Doctors/Clients/Receptionists/Lab Managers receive 403 Forbidden responses when trying to access unauthorized screens.
+- [ ] Slot double-booking: Ensure overlapping appointments fail at database transaction layers.
+- [ ] Lab Bookings & Uploads: Check that lab manager can upload reports directly or fall back to jsPDF fake report compiled automatically.
+- [ ] Invoicing integrity: Confirm that adding new lab items or consultation visits updates invoice totals automatically.
+- [ ] RLS validation: Assert query requests using foreign client IDs fail to read clinical notes.
+- [ ] Upload check: Test that Cloudinary file upload routes reject files over 5MB and files with invalid extensions.
+- [ ] Queue synchronization: Verify receptionist queue check-ins and lab test arrivals immediately update dashboards.
+- [ ] Workload graphs: Verify correct calculation of financial reports and charts.
+- [ ] Mobile responsiveness: Test dashboard layout display and operations on viewport widths below 480px.
+---
+# **📈 25. Deployment Plan**
+- **CI/CD pipeline:** Run automatic linting checks and validations on main-branch pulls via GitHub Actions.
+- **Frontend hosting:** Host the Next.js app on Vercel CDN pipelines.
+- **Backend database:** Host the PostgreSQL database, auth rules, and RLS tables on Supabase Cloud RDS.
+- **Media CDN:** Host clinical attachments on Cloudinary's secure media server storage.
+---
+# **🚀 26. Future Improvements**
+- Integrate third-party SMS reminder notifications (e.g. Twilio API).
+- Sync prescriptions directly with local pharmacy catalogs.
+- Implement automated scheduling assistants leveraging double-booking prediction algorithms.
+- Support multi-language localized displays (i18n) for clients.
