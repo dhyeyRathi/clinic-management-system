@@ -27,6 +27,7 @@ export function ThemeToggle() {
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
 
+
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
