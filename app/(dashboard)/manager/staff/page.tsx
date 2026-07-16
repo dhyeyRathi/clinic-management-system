@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Staff Directory | Manager Dashboard",
+};
+
 import { createClient } from "@/lib/supabase/server";
 import StaffListClient from "./components/StaffListClient";
 

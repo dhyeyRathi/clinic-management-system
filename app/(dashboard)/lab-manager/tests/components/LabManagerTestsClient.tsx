@@ -10,7 +10,7 @@ import {
   Activity,
   AlertCircle,
 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { toggleLabTestTypeStatusAction } from "@/app/actions/labTests";
 
 interface LabTest {
@@ -63,7 +63,7 @@ export default function LabManagerTestsClient({
 
   return (
     <>
-      <Toaster position="top-right" richColors />
+      
 
       {/* Search Header */}
       <div className="flex justify-between items-center bg-card border border-border rounded-2xl p-4 shadow-sm">

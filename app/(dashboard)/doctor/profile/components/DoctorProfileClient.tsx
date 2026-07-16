@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import {
   User,
   Phone,
@@ -149,7 +149,7 @@ export default function DoctorProfileClient({ profile }: DoctorProfileClientProp
 
   return (
     <>
-      <Toaster position="top-right" richColors />
+      
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Card: Avatar & basic Info */}

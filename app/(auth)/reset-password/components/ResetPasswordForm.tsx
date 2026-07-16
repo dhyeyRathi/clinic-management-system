@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema, ResetPasswordSchema } from "../schema";
 import { resetPasswordAction } from "../actions";
 import { Lock, Eye, EyeOff, CheckCircle, ArrowRight, Loader2 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -78,7 +78,7 @@ const ResetPasswordForm = () => {
 
   return (
     <>
-      <Toaster position="top-right" richColors />
+      
 
       <div className="bg-card/60 backdrop-blur-md border border-border shadow-2xl rounded-3xl p-8 max-w-md w-full transition-all duration-300">
         <div className="text-center mb-8">

@@ -34,7 +34,7 @@ import {
   Clock,
   ClipboardList,
 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import Image from "next/image";
 
 interface ResourcesClientProps {
@@ -257,7 +257,7 @@ export default function ResourcesClient({
 
   return (
     <>
-      <Toaster position="top-right" richColors />
+      
 
       {/* Tabs Selection Bar */}
       <div className="flex gap-2 border-b border-border pb-px mb-6">

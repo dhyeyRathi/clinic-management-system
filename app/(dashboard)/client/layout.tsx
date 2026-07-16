@@ -1,6 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ClientSidebar } from "@/components/layout/ClientSidebar";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "CLIENT | DASHBOARD",
+};
 
 export default async function ClientLayout({
   children,

@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Appointments Coordinator | Receptionist Dashboard",
+};
+
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import ReceptionistAppointmentsClient from "./components/ReceptionistAppointmentsClient";

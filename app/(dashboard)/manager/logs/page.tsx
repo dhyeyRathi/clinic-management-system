@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Audit Logs | Manager Dashboard",
+};
+
 import { createClient } from "@/lib/supabase/server";
 import LogsClient from "./components/LogsClient";
 

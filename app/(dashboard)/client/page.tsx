@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Overview | Client Dashboard",
+};
+
 import { createClient } from "@/lib/supabase/server";
 import {
   CalendarDays,

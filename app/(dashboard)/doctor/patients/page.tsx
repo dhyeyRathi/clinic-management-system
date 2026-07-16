@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Patients Directory | Doctor Dashboard",
+};
+
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import DoctorPatientsClient from "./components/DoctorPatientsClient";

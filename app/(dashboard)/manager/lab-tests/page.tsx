@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Diagnostics Catalog | Manager Dashboard",
+};
+
 import { createClient } from "@/lib/supabase/server";
 import LabTestsClient from "./components/LabTestsClient";
 

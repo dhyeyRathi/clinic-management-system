@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Finance Ledger | Manager Dashboard",
+};
+
 import { createClient } from "@/lib/supabase/server";
 import FinanceClient from "./components/FinanceClient";
 

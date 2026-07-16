@@ -1,6 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ReceptionistSidebar } from "@/components/layout/ReceptionistSidebar";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "RECEPTIONIST | DASHBOARD",
+};
 
 export default async function ReceptionistLayout({
   children,

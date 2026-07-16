@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Billing Desk | Receptionist Dashboard",
+};
+
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import ReceptionistInvoicesClient from "./components/ReceptionistInvoicesClient";

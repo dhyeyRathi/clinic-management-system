@@ -16,7 +16,7 @@ import {
   ChevronRight,
   Loader2,
 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 interface FinanceClientProps {
   initialInvoices: any[];
@@ -74,7 +74,7 @@ export default function FinanceClient({ initialInvoices }: FinanceClientProps) {
 
   return (
     <>
-      <Toaster position="top-right" richColors />
+      
 
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border border-border rounded-2xl p-4 shadow-sm">

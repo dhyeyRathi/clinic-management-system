@@ -13,7 +13,7 @@ import {
   AlertCircle,
   FlaskConical,
 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { issueClinicalReportAction } from "@/app/actions/doctor";
 
 interface Client {
@@ -140,7 +140,7 @@ export default function DoctorReportsClient({
 
   return (
     <>
-      <Toaster position="top-right" richColors />
+      
 
       {/* Control Roster */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border border-border rounded-2xl p-4 shadow-sm">

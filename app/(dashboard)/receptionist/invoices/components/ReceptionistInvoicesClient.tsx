@@ -18,7 +18,7 @@ import {
   Loader2,
   Trash2,
 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { receptionistCreateInvoiceAction } from "@/app/actions/receptionist";
 import { updateInvoiceStatusAction } from "@/app/actions/finance";
 
@@ -212,7 +212,7 @@ export default function ReceptionistInvoicesClient({
 
   return (
     <div className="space-y-4">
-      <Toaster position="top-right" richColors />
+      
 
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border border-border rounded-2xl p-4 shadow-sm print:hidden">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useRef } from "react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { User, Phone, Calendar, Mail, MapPin, ShieldAlert, Camera, Save, Loader2 } from "lucide-react";
 import { updateClientProfileAction } from "@/app/actions/clientProfile";
 
@@ -105,7 +105,7 @@ export default function ProfileClient({ profile }: ProfileClientProps) {
 
   return (
     <>
-      <Toaster position="top-right" richColors />
+      
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Avatar & Read-only Account Info */}

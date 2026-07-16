@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Clinic Analytics | Manager Dashboard",
+};
+
 import { createClient } from "@/lib/supabase/server";
 import AnalyticsClient from "./components/AnalyticsClient";
 

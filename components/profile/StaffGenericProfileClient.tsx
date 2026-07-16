@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import { User, Phone, Mail, Camera, Loader2, Save } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { updateStaffProfileAction } from "@/app/actions/staff";
 
 interface StaffProfile {
@@ -71,7 +71,7 @@ export default function StaffGenericProfileClient({
 
   return (
     <div className="bg-card border border-border shadow-sm rounded-3xl p-6 md:p-8 max-w-2xl">
-      <Toaster position="top-right" richColors />
+      
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Avatar Stream Header */}

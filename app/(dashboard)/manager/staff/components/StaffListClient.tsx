@@ -16,7 +16,7 @@ import {
   Ban,
   CheckCircle,
 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 interface StaffListClientProps {
   initialStaff: any[];
@@ -101,7 +101,7 @@ export default function StaffListClient({ initialStaff }: StaffListClientProps) 
 
   return (
     <>
-      <Toaster position="top-right" richColors />
+      
 
       {/* Control Bar */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border border-border rounded-2xl p-4 shadow-sm">

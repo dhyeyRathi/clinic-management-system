@@ -13,7 +13,7 @@ import {
   Loader2,
   CheckCircle2,
 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { bookAppointmentAction } from "@/app/actions/appointments";
 
 interface Doctor {
@@ -79,7 +79,7 @@ export default function DoctorsCatalogClient({ doctors }: DoctorsCatalogClientPr
 
   return (
     <>
-      <Toaster position="top-right" richColors />
+      
 
       {/* Search Bar */}
       <div className="flex items-center justify-between bg-card border border-border rounded-2xl p-4 shadow-sm gap-4">

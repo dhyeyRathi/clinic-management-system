@@ -15,7 +15,7 @@ import {
   XCircle,
   HelpCircle,
 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { bookAppointmentAction, cancelAppointmentAction } from "@/app/actions/appointments";
 
 interface Doctor {
@@ -153,7 +153,7 @@ export default function AppointmentsClient({
 
   return (
     <>
-      <Toaster position="top-right" richColors />
+      
 
       {/* Action Header */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card border border-border rounded-2xl p-4 shadow-sm">

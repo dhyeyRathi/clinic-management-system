@@ -1,6 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { LabManagerSidebar } from "@/components/layout/LabManagerSidebar";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "LAB MANAGER | DASHBOARD",
+};
 
 export default async function LabManagerLayout({
   children,

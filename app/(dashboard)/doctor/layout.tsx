@@ -1,6 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { DoctorSidebar } from "@/components/layout/DoctorSidebar";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DOCTOR | DASHBOARD",
+};
 
 export default async function DoctorLayout({
   children,
