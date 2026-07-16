@@ -37,6 +37,7 @@ interface Appointment {
   mode: "IN_PERSON" | "VIRTUAL";
   notes: string | null;
   doctor_id: string;
+  confirmed_by_name: string | null;
   doctor_profiles: {
     id: string;
     specialization: string;
@@ -287,6 +288,14 @@ export default function AppointmentsClient({
                       <span className="text-muted">Consultation Fee:</span>
                       <span className="font-bold text-heading">
                         ${Number(docInfo.consultation_fee).toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  {app.confirmed_by_name && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted">Approved By:</span>
+                      <span className="font-semibold text-primary">
+                        {app.confirmed_by_name}
                       </span>
                     </div>
                   )}

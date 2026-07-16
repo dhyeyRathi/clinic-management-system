@@ -45,6 +45,9 @@ export default async function AppointmentsPage() {
       mode,
       notes,
       doctor_id,
+      confirmed_by_profile: profiles!confirmed_by (
+        name
+      ),
       doctor_profiles (
         id,
         specialization,
@@ -84,8 +87,13 @@ export default async function AppointmentsPage() {
       ? (Array.isArray(docProfile.profiles) ? docProfile.profiles[0] : docProfile.profiles)
       : null;
 
+    const receptionist = app.confirmed_by_profile
+      ? (Array.isArray(app.confirmed_by_profile) ? app.confirmed_by_profile[0] : app.confirmed_by_profile)
+      : null;
+
     return {
       ...app,
+      confirmed_by_name: receptionist?.name || null,
       doctor_profiles: docProfile
         ? {
             id: docProfile.id,

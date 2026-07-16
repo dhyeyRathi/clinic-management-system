@@ -112,6 +112,7 @@ export async function receptionistManageAppointmentAction(
 
   try {
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
     const { data: beforeData } = await supabase
       .from("appointments")
@@ -122,6 +123,8 @@ export async function receptionistManageAppointmentAction(
     const updateFields: any = { status };
     if (status === "CHECKED_IN") {
       updateFields.checked_in_at = new Date().toISOString();
+    } else if (status === "CONFIRMED") {
+      updateFields.confirmed_by = user?.id;
     }
 
     const { error } = await supabase
@@ -175,6 +178,7 @@ export async function receptionistBookAppointmentAction(
         mode,
         reason,
         created_by: user?.id,
+        confirmed_by: user?.id,
       })
       .select("id")
       .single();
