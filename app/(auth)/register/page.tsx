@@ -1,6 +1,5 @@
 import React from "react";
 import RegistrationForm from "./components/RegistrationForm";
-import { HeartPulse } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata = {
@@ -22,8 +21,8 @@ const RegisterPage = () => {
 
       {/* Brand Logo Header */}
       <div className="flex items-center gap-3 mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-        <div className="w-12 h-12 bg-primary text-white dark:text-background rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
-          <HeartPulse className="w-7 h-7" />
+        <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 font-extrabold text-2xl">
+          C
         </div>
         <div>
           <h1 className="text-xl font-bold text-heading leading-tight tracking-tight">

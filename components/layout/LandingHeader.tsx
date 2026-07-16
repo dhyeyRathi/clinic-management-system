@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LogoutButton } from "@/components/logout-button";
-import { HeartPulse, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 interface LandingHeaderProps {
   userDashboard: string | null;
@@ -38,8 +38,8 @@ export function LandingHeader({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-90 transition-opacity">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
-              <HeartPulse className="w-5.5 h-5.5 sm:w-6 sm:h-6 text-white" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary flex items-center justify-center shrink-0 font-extrabold text-white text-lg sm:text-xl">
+              C
             </div>
             <div>
               <span className="font-bold text-lg sm:text-xl text-heading tracking-tight block leading-none">
