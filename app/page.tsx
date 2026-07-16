@@ -198,7 +198,7 @@ export default async function Home() {
                           <span className="text-2xl font-bold text-primary">{initials}</span>
                         )}
                       </div>
-                      <h4 className="font-bold text-lg text-heading mb-1 line-clamp-1" title={`Dr. ${cleanName}`}>Dr. {cleanName}</h4>
+                      <h3 className="font-bold text-lg text-heading mb-1 line-clamp-1 text-base" title={`Dr. ${cleanName}`}>Dr. {cleanName}</h3>
                       <p className="text-sm font-medium text-primary mb-4 line-clamp-1" title={doc.specialization}>{doc.specialization}</p>
                       <Link href="/register" className="mt-auto pt-2 text-primary font-semibold text-sm hover:underline flex items-center gap-1 group">
                         Book Appointment <span className="group-hover:translate-x-0.5 transition-transform">&rarr;</span>
@@ -250,7 +250,7 @@ export default async function Home() {
                     {/* Card Content */}
                     <div className="p-6 flex flex-col flex-grow">
                       <div className="flex items-start justify-between mb-3">
-                        <h4 className="font-bold text-heading text-lg leading-tight">{test.name}</h4>
+                        <h3 className="font-bold text-heading text-lg leading-tight text-base">{test.name}</h3>
                       </div>
                       <p className="text-sm text-muted mb-6 line-clamp-2">{test.description}</p>
                       
@@ -317,6 +317,26 @@ export default async function Home() {
           </div>
         </div>
       </footer>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "MedicalBusiness",
+            "name": "ClinicFlow Medical Center",
+            "url": "https://clinicflow.vercel.app",
+            "logo": "https://clinicflow.vercel.app/favicon.png",
+            "description": "Secure, role-based, multi-user clinic management workflow platform.",
+            "medicalSpecialty": ["GeneralPractice", "DiagnosticServices"],
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "123 Health Ave",
+              "addressLocality": "Medical City",
+              "addressCountry": "US"
+            }
+          }),
+        }}
+      />
     </div>
   );
 }

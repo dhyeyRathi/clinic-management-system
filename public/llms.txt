@@ -1,0 +1,22 @@
+# ClinicFlow - Medical Center
+
+ClinicFlow is a secure, role-based, multi-user healthcare workflow platform. It manages client scheduling, doctor consultations, receptionist queues, electronic medical records, lab test orders, result uploads, and manager analytics.
+
+## Main Sitemap
+- Home: https://clinicflow.vercel.app/
+- About: https://clinicflow.vercel.app/about
+- Login: https://clinicflow.vercel.app/login
+- Register: https://clinicflow.vercel.app/register
+
+## Role Architecture
+- **Clients**: Book consultations, request lab tests, view medical histories, invoices, and results.
+- **Doctors**: Manage schedules, record consultation notes, recommend lab tests, and write digital prescriptions.
+- **Receptionists**: Handle client registrations, check-in queues, and bill invoices.
+- **Lab Managers**: Manage lab tests catalogs, check-in test slots, and upload results.
+- **Managers**: Manage staff lists, test service catalogs, asset inventory, finance audits, and activity logs.
+
+## Technology Stack
+- Next.js 16 (App Router)
+- Supabase (PostgreSQL with Row-Level Security)
+- TailwindCSS (Styling)
+- Cloudinary (Scanned document and PDF hosting)

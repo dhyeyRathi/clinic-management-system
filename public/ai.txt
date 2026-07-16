@@ -1,0 +1,10 @@
+# AI Crawling Rules for ClinicFlow
+User-agent: *
+Allow: /about
+Allow: /llms.txt
+Disallow: /client
+Disallow: /doctor
+Disallow: /manager
+Disallow: /receptionist
+Disallow: /lab-manager
+Disallow: /api/

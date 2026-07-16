@@ -170,7 +170,7 @@ export default async function AboutPage() {
                 </span>
               </div>
               <div>
-                <h4 className="font-extrabold text-heading text-lg mb-1">ClinicFlow HQ</h4>
+                <h3 className="font-extrabold text-heading text-lg mb-1 text-base">ClinicFlow HQ</h3>
                 <p className="text-xs text-muted">100 Health Science Parkway, Suite A, Medical Center</p>
               </div>
             </div>
@@ -223,6 +223,20 @@ export default async function AboutPage() {
           </div>
         </div>
       </footer>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "MedicalBusiness",
+            "name": "ClinicFlow Medical Center - About Us",
+            "url": "https://clinicflow.vercel.app/about",
+            "logo": "https://clinicflow.vercel.app/favicon.png",
+            "description": "Excellence in clinic management workflows and modern clinical diagnostics.",
+            "medicalSpecialty": ["GeneralPractice", "DiagnosticServices"]
+          }),
+        }}
+      />
     </div>
   );
 }

@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /client/
+Disallow: /doctor/
+Disallow: /manager/
+Disallow: /receptionist/
+Disallow: /lab-manager/
+Disallow: /auth/
+
+Sitemap: https://clinic-flow-intern.vercel.app/sitemap.xml
+Sitemap: https://clinic-flow-intern.vercel.app/page/sitemap.xml

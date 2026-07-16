@@ -7,8 +7,15 @@ const PUBLIC_PREFIXES = [
   "/_next",
   "/static",
   "/favicon.ico",
+  "/favicon.png",
+  "/icon.png",
   "/api/auth",
-  "/images"
+  "/images",
+  "/about",
+  "/sitemap.xml",
+  "/robots.txt",
+  "/llms.txt",
+  "/ai.txt"
 ];
 
 const AUTH_PAGES = [
