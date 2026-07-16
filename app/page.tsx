@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { LogoutButton } from "@/components/logout-button";
+import { LandingHeader } from "@/components/layout/LandingHeader";
 import { createClient } from "@/lib/supabase/server";
 import {
   HeartPulse,
@@ -83,68 +82,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-background text-body flex flex-col font-sans selection:bg-primary selection:text-white">
       {/* ── HEADER ────────────────────────────────────────── */}
-      <header className="border-b border-border bg-card sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
-              <HeartPulse className="w-5.5 h-5.5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <div>
-              <span className="font-bold text-lg sm:text-xl text-heading tracking-tight block leading-none">
-                ClinicFlow
-              </span>
-              <span className="text-[11px] font-medium text-muted uppercase tracking-wider hidden sm:block mt-1">
-                Medical Center
-              </span>
-            </div>
-          </div>
-
-          <nav className="hidden lg:flex items-center gap-6">
-            <Link href="/" className="text-sm font-semibold text-primary hover:text-primary transition-colors">
-              Home
-            </Link>
-            <Link href="#services" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
-              Our Services
-            </Link>
-            <Link href="#specialists" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
-              Specialists
-            </Link>
-            <Link href="#diagnostics" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
-              Diagnostics
-            </Link>
-            <Link href="/about" className="text-sm font-semibold text-muted hover:text-primary transition-colors">
-              About Us
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-2.5 sm:gap-4 lg:gap-5">
-            <ThemeToggle />
-            {userDashboard ? (
-              <div className="flex items-center gap-2 sm:gap-4">
-                <span className="text-sm text-muted hidden xl:inline whitespace-nowrap">
-                  Welcome back, <strong className="text-heading font-semibold">{userName}</strong>
-                </span>
-                <Link
-                  href={userDashboard}
-                  className="bg-primary hover:bg-primary-hover text-white px-3.5 py-2 rounded-md text-xs sm:text-sm sm:px-5 sm:py-2.5 font-semibold transition-colors shadow-sm whitespace-nowrap"
-                >
-                  Dashboard
-                </Link>
-                <LogoutButton />
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/register"
-                  className="text-sm font-semibold text-heading hover:text-primary transition-colors px-3 py-2"
-                >
-                  Sign up
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      <LandingHeader userDashboard={userDashboard} userName={userName} currentPath="/" />
 
       <main className="flex-grow">
         {/* ── HERO SECTION ───────────────────────────────────── */}
