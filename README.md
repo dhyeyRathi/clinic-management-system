@@ -1,11 +1,13 @@
-# for manager testing use this credentials for manager role sign in
-manager@clinicflow.com
-manager@123 (if doesnt work try with a capital M)
 
 
 # ClinicFlow — Clinic Management System
 
 ClinicFlow is a secure, role-based, multi-user healthcare workflow platform. It digitizes operations by centralizing client scheduling, doctor consultations, receptionist queue management, medical histories, prescription handling, laboratory test bookings, lab result distribution, and manager dashboards.
+
+(# for manager testing use this credentials for manager role sign in
+manager@clinicflow.com
+manager@123 (if doesnt work try with a capital M)
+)
 
 ## 🚀 Key Features
 
