@@ -122,7 +122,7 @@ export async function proxy
     }
   } catch (error) {
     console.error("Session verification in proxy failed:", error);
-    // On error, let the request proceed to prevent lockouts, or redirect to login if not public
+
     if (!isAuthPage && url !== "/") {
       const loginUrl = new URL("/login", request.url);
       return NextResponse.redirect(loginUrl);
