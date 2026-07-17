@@ -48,15 +48,17 @@ export default async function AboutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-body flex flex-col font-sans selection:bg-primary selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-background text-body flex flex-col font-sans selection:bg-primary selection:text-white relative">
       {/* Ambient background glow orbs */}
-      <div className="glow-bg glow-1"></div>
-      <div className="glow-bg glow-2"></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="glow-bg glow-1"></div>
+        <div className="glow-bg glow-2"></div>
+      </div>
 
       {/* ── HEADER ────────────────────────────────────────── */}
       <LandingHeader userDashboard={userDashboard} userName={userName} currentPath="/about" />
 
-      <main className="flex-grow">
+      <main className="flex-grow pt-20">
         {/* ── HERO SECTION ───────────────────────────────────── */}
         <section className="relative px-4 sm:px-6 lg:px-8 py-20 md:py-28 max-w-7xl mx-auto flex flex-col items-center text-center overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent -z-10" />

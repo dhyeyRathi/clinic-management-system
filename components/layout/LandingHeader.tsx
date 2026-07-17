@@ -34,7 +34,7 @@ export function LandingHeader({
   return (
     <>
       {/* ── DESKTOP HEADER ────────────────────────────────── */}
-      <header className="border-b border-border bg-card sticky top-0 z-50 shadow-sm">
+      <header className="border-b border-border bg-card fixed top-0 left-0 right-0 z-[1000] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 hover:opacity-90 transition-opacity">
@@ -111,7 +111,7 @@ export function LandingHeader({
 
       {/* ── MOBILE SIDEBAR DRAWER ─────────────────────────── */}
       <div
-        className={`fixed inset-0 z-50 transition-opacity duration-300 lg:hidden ${
+        className={`fixed inset-0 z-[1001] transition-opacity duration-300 lg:hidden ${
           mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >

@@ -28,6 +28,7 @@ export default async function PublicDoctorProfilePage(
       qualifications,
       consultation_fee,
       availability,
+      biography,
       profiles (
         id,
         name,
@@ -53,6 +54,7 @@ export default async function PublicDoctorProfilePage(
         qualifications,
         consultation_fee,
         availability,
+        biography,
         profiles (
           id,
           name,
@@ -77,9 +79,10 @@ export default async function PublicDoctorProfilePage(
   const storyDetails = Array.isArray(doctor.doctor_details)
     ? doctor.doctor_details[0]
     : doctor.doctor_details;
-  const story = storyDetails?.story || "";
+  const story = (doctor as any).biography || storyDetails?.story || "";
   const availability = (doctor.availability || []) as AvailabilitySlot[];
-  const initials = profile?.name ? profile.name.replace(/^dr\.?\s+/i, "").slice(0, 2).toUpperCase() : "DR";
+  const cleanName = profile?.name ? profile.name.replace(/^dr\.?\s+/i, "") : "Practitioner";
+  const initials = cleanName.slice(0, 2).toUpperCase();
 
   // Check auth user state for the header links
   const { data: { user } } = await supabase.auth.getUser();
@@ -107,15 +110,17 @@ export default async function PublicDoctorProfilePage(
   }
 
   return (
-    <div className="min-h-screen bg-background text-body flex flex-col font-sans selection:bg-primary selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-background text-body flex flex-col font-sans selection:bg-primary selection:text-white relative">
       {/* Ambient background glow orbs */}
-      <div className="glow-bg glow-1"></div>
-      <div className="glow-bg glow-2"></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="glow-bg glow-1"></div>
+        <div className="glow-bg glow-2"></div>
+      </div>
 
       {/* Header */}
       <LandingHeader userDashboard={userDashboard} userName={userName} currentPath="" />
 
-      <main className="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 space-y-10 relative z-10">
+      <main className="flex-grow max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-10 md:pt-36 md:pb-16 space-y-10 relative z-10">
         {/* Back Link */}
         <Link href="/#specialists" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
           <ArrowLeft className="w-4 h-4" /> Back to specialists directory
@@ -126,7 +131,7 @@ export default async function PublicDoctorProfilePage(
           {/* Avatar frame */}
           <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-surface border border-border/40 overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
             {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt={`Dr. ${profile.name}`} className="w-full h-full object-cover" />
+              <img src={profile.avatar_url} alt={`Dr. ${cleanName}`} className="w-full h-full object-cover" />
             ) : (
               <span className="text-5xl font-black text-primary/40">{initials}</span>
             )}
@@ -138,7 +143,7 @@ export default async function PublicDoctorProfilePage(
               <span className="inline-block px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
                 {doctor.specialization}
               </span>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-heading">Dr. {profile?.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-heading">Dr. {cleanName}</h1>
               <p className="text-sm text-muted font-medium mt-1 flex items-center justify-center md:justify-start gap-1">
                 <GraduationCap className="w-4 h-4 text-primary" /> {doctor.qualifications}
               </p>
@@ -182,7 +187,7 @@ export default async function PublicDoctorProfilePage(
                 </div>
               ) : (
                 <p className="text-muted text-sm italic">
-                  Biography story currently being written. Please contact the medical center front desk for more details on Dr. {profile?.name}&apos;s background.
+                  Biography story currently being written. Please contact the medical center front desk for more details on Dr. {cleanName}&apos;s background.
                 </p>
               )}
             </div>

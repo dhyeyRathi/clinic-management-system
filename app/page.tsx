@@ -79,15 +79,17 @@ export default async function Home() {
   const activeLabTests = dbLabTests || [];
 
   return (
-    <div className="min-h-screen bg-background text-body flex flex-col font-sans selection:bg-primary selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-background text-body flex flex-col font-sans selection:bg-primary selection:text-white relative">
       {/* Ambient background glow orbs */}
-      <div className="glow-bg glow-1"></div>
-      <div className="glow-bg glow-2"></div>
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="glow-bg glow-1"></div>
+        <div className="glow-bg glow-2"></div>
+      </div>
 
       {/* ── HEADER ────────────────────────────────────────── */}
       <LandingHeader userDashboard={userDashboard} userName={userName} currentPath="/" />
 
-      <main className="flex-grow">
+      <main className="flex-grow pt-20">
         {/* ── HERO SECTION ───────────────────────────────────── */}
         <section className="px-4 sm:px-6 lg:px-8 py-20 md:py-32 max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center text-left">
@@ -166,7 +168,7 @@ export default async function Home() {
         </section>
 
         {/* ── OUR SERVICES ────────────────────────────────────── */}
-        <section id="services" className="bg-surface border-y border-border py-20">
+        <section id="services" className="scroll-mt-20 bg-surface border-y border-border py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-heading mb-4">Comprehensive Care Offerings</h2>
@@ -210,7 +212,7 @@ export default async function Home() {
         </section>
 
         {/* ── OUR SPECIALISTS ─────────────────────────────────── */}
-        <section id="specialists" className="py-20">
+        <section id="specialists" className="scroll-mt-20 py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12 flex flex-col items-center">
               <h2 className="text-3xl md:text-4xl font-bold text-heading mb-4">Our Medical Specialists</h2>
@@ -236,8 +238,8 @@ export default async function Home() {
                   const initials = cleanName.slice(0, 2).toUpperCase();
                   
                   return (
-                    <div key={doc.id} className="glass-panel w-full sm:w-[280px] rounded-xl p-0 overflow-hidden flex flex-col group">
-                      <Link href={`/doctors/${doc.id}`} className="h-48 relative bg-surface overflow-hidden flex items-center justify-center border-b border-border/30 cursor-pointer block">
+                    <div key={doc.id} className="glass-panel w-[280px] min-h-[460px] rounded-xl p-0 overflow-hidden flex flex-col group shadow-sm hover:shadow-md transition-shadow duration-300">
+                      <Link href={`/doctors/${doc.id}`} className="h-64 relative bg-surface overflow-hidden flex items-center justify-center border-b border-border/30 cursor-pointer block">
                         {doc.avatarUrl ? (
                           <img src={doc.avatarUrl} alt={`Dr. ${cleanName}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                         ) : (
@@ -271,7 +273,7 @@ export default async function Home() {
         </section>
 
         {/* ── DIAGNOSTICS & LABS ─────────────────────────────── */}
-        <section id="diagnostics" className="bg-surface border-y border-border py-20">
+        <section id="diagnostics" className="scroll-mt-20 bg-surface border-y border-border py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-heading mb-4">Laboratory & Diagnostics</h2>
