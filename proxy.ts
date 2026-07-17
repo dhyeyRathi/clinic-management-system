@@ -39,7 +39,7 @@ export async function proxy
   (request: NextRequest) {
   const url = request.nextUrl.pathname;
 
-  // 1. Let public assets pass immediately
+
   const isAsset = PUBLIC_PREFIXES.some(prefix => url.startsWith(prefix));
   if (isAsset) {
     return NextResponse.next();
@@ -53,17 +53,16 @@ export async function proxy
       data: { user },
     } = await supabase.auth.getUser();
 
-    // User is NOT logged in
+
     if (!user) {
       if (isAuthPage || url === "/") {
         return NextResponse.next();
       }
-      // Redirect protected paths to /login
+
       const loginUrl = new URL("/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
 
-    // User IS logged in, fetch their role from profiles table
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -73,7 +72,7 @@ export async function proxy
     const role = profile?.role || "CLIENT";
     const userDashboard = ROLE_DASHBOARDS[role] || "/client";
 
-    // If user is on an auth page (login/register), redirect to their dashboard
+
     if (isAuthPage) {
       if (url.startsWith("/reset-password")) {
         return NextResponse.next();
@@ -82,13 +81,11 @@ export async function proxy
       return NextResponse.redirect(dashboardUrl);
     }
 
-    // Role-based Path Protection:
-    // e.g. A CLIENT should not access /doctor or /manager paths
+
     const rolePaths = Object.values(ROLE_DASHBOARDS);
     const targetRolePrefix = rolePaths.find(prefix => url.startsWith(prefix));
 
     if (targetRolePrefix && targetRolePrefix !== userDashboard) {
-      // Return a 403 Forbidden response instead of redirecting or throwing 404
       return new NextResponse(
         `<!DOCTYPE html>
         <html lang="en">

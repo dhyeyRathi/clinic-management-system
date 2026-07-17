@@ -77,6 +77,11 @@ export default function LabReportsUploadClient({ patients, testTypes }: LabRepor
       return;
     }
 
+    if (!selectedFile) {
+      toast.error("Please upload a diagnostic report file.");
+      return;
+    }
+
     const test = testTypes.find((t) => t.id === selectedTestId);
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -212,7 +217,7 @@ export default function LabReportsUploadClient({ patients, testTypes }: LabRepor
           {/* File Upload Component */}
           <div className="space-y-3">
             <label className="block text-xs font-bold text-heading uppercase tracking-wider">
-              3. Diagnostic File Upload (Optional)
+              3. Diagnostic File Upload (Required) *
             </label>
             <div className="relative group border-2 border-dashed border-border hover:border-primary/50 rounded-2xl p-8 text-center bg-hover/20 hover:bg-hover/45 transition-all">
               <input
@@ -221,6 +226,7 @@ export default function LabReportsUploadClient({ patients, testTypes }: LabRepor
                 accept="application/pdf,image/*"
                 onChange={handleFileChange}
                 disabled={isPending}
+                required
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
               />
               <div className="flex flex-col items-center justify-center gap-3">
@@ -238,7 +244,6 @@ export default function LabReportsUploadClient({ patients, testTypes }: LabRepor
                     <>
                       <p className="font-bold text-sm text-heading">Click or drag report to upload</p>
                       <p className="text-xs text-muted mt-1">Accepts PDF files and images up to 5MB</p>
-                      <p className="text-[11px] text-primary/80 mt-2 font-medium">Leave empty to auto-generate a mock lab report PDF for this patient.</p>
                     </>
                   )}
                 </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import {
   Search,
   Filter,
@@ -94,7 +94,7 @@ export default function LogsClient({ initialLogs }: LogsClientProps) {
                 filteredLogs.map((log) => {
                   const isExpanded = expandedLogId === log.id;
                   return (
-                    <>
+                    <Fragment key={log.id}>
                       <tr
 
                         onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
@@ -185,7 +185,7 @@ export default function LogsClient({ initialLogs }: LogsClientProps) {
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })
               )}

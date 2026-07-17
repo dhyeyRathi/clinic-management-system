@@ -43,6 +43,14 @@ export default async function StaffManagementPage() {
         </div>
       </div>
 
+      {/* Email Verification Warning Banner */}
+      <div className="p-4 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-xl text-sm font-semibold flex items-center gap-3 shadow-sm">
+        <span className="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-white dark:text-background font-black text-xs">!</span>
+        <span>
+          <strong>Security Notice:</strong> Please ensure you use <strong>only verified email addresses</strong> when registering new clinic staff accounts.
+        </span>
+      </div>
+
       {/* Staff Management Console */}
       <StaffListClient initialStaff={staff} />
     </div>

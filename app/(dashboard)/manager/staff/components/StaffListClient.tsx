@@ -297,6 +297,11 @@ export default function StaffListClient({ initialStaff }: StaffListClientProps) 
             </div>
 
             <form onSubmit={handleFormSubmit} encType="multipart/form-data" className="p-6 space-y-4">
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-xl text-xs font-semibold flex items-start gap-2.5 shadow-inner">
+                <span className="shrink-0 text-sm leading-none">⚠️</span>
+                <span>Important: Please use only verified, active email addresses to create staff accounts.</span>
+              </div>
+
               {error && (
                 <div className="p-3 bg-danger/10 border border-danger/20 text-danger rounded-xl text-xs font-semibold flex items-center gap-2">
                   <X className="w-4 h-4 shrink-0" />
